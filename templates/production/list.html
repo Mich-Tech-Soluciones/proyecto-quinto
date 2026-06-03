@@ -1,0 +1,80 @@
+{% extends "base.html" %}
+
+{% block page_title %}Taller / Producción{% endblock %}
+
+{% block content %}
+<div class="row g-4">
+    <div class="col-lg-4">
+        <div class="glass-card shadow-lg h-100">
+            <h5 class="fw-bold text-white mb-4"><i class="bi bi-inbox-fill me-2 text-atrium"></i> Órdenes Pendientes</h5>
+            <div class="alert alert-info bg-dark border-secondary text-white-50 small">
+                Pedidos de venta que requieren pasar al taller de producción.
+            </div>
+            
+            <ul class="list-group list-group-flush mb-3">
+                {% for order in pending_orders %}
+                <li class="list-group-item bg-transparent border-secondary text-white p-3">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <strong>#{{ order.id }} - {{ order.customer_name }}</strong><br>
+                            <small class="text-white-50">{{ order.created_at|date:"d M Y" }}</small>
+                        </div>
+                        <form method="POST">
+                            {% csrf_token %}
+                            <input type="hidden" name="order_id" value="{{ order.id }}">
+                            <button type="submit" class="btn btn-sm btn-atrium"><i class="bi bi-arrow-right-circle"></i> Iniciar</button>
+                        </form>
+                    </div>
+                </li>
+                {% empty %}
+                <li class="list-group-item bg-transparent border-secondary text-white-50 text-center">No hay órdenes pendientes.</li>
+                {% endfor %}
+            </ul>
+        </div>
+    </div>
+    
+    <div class="col-lg-8">
+        <div class="glass-card shadow-lg h-100">
+            <h5 class="fw-bold text-white mb-4"><i class="bi bi-tools me-2 text-atrium"></i> Hojas de Producción</h5>
+            <div class="table-responsive">
+                <table class="table custom-table align-middle">
+                    <thead>
+                        <tr>
+                            <th>ID Hoja</th>
+                            <th>Pedido Base</th>
+                            <th>Cliente</th>
+                            <th>Estado</th>
+                            <th class="text-end">Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for sheet in sheets %}
+                        <tr>
+                            <td><span class="text-white-50">#{{ sheet.id }}</span></td>
+                            <td><span class="badge bg-dark border border-secondary">Pedido #{{ sheet.order.id }}</span></td>
+                            <td>{{ sheet.order.customer_name }}</td>
+                            <td>
+                                <select class="form-select form-select-sm bg-dark text-white border-secondary" style="width: 130px;">
+                                    <option {% if sheet.status == 'Pendiente' %}selected{% endif %}>Pendiente</option>
+                                    <option {% if sheet.status == 'En Corte' %}selected{% endif %}>En Corte</option>
+                                    <option {% if sheet.status == 'En Costura' %}selected{% endif %}>En Costura</option>
+                                    <option {% if sheet.status == 'Control Calidad' %}selected{% endif %}>Control Calidad</option>
+                                    <option {% if sheet.status == 'Completado' %}selected{% endif %}>Completado</option>
+                                </select>
+                            </td>
+                            <td class="text-end">
+                                <a href="{% url 'production_print' sheet.id %}" target="_blank" class="btn btn-sm btn-outline-light" title="Imprimir Hoja A4">
+                                    <i class="bi bi-printer"></i> Imprimir
+                                </a>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr><td colspan="5" class="text-center text-muted py-5">No hay hojas de producción en proceso.</td></tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

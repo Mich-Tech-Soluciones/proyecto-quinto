@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+
+{% block page_title %}Registrar Costo{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div class="text-muted">Añadir nuevo costo de producción</div>
+    <a href="{% url 'cost_list' %}" class="btn btn-outline-secondary rounded-pill border-secondary text-white">
+        <i class="bi bi-arrow-left"></i> Volver al listado
+    </a>
+</div>
+
+<div class="glass-card" style="max-width: 600px;">
+    <form method="post">
+        {% csrf_token %}
+        
+        <div class="mb-3">
+            <label class="form-label text-muted small">Proceso de Producción Asociado (Opcional)</label>
+            {{ form.production_process }}
+        </div>
+        
+        <div class="mb-3">
+            <label class="form-label text-muted small">Descripción del Costo</label>
+            {{ form.description }}
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label text-muted small">Monto ($)</label>
+            {{ form.amount }}
+        </div>
+
+        <div class="mt-4 text-end">
+            <button type="submit" class="btn btn-atrium px-4">Guardar Costo</button>
+        </div>
+    </form>
+</div>
+{% endblock %}

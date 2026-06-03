@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+
+{% block page_title %}Ventas{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div class="text-muted">Registro de Ventas</div>
+    {% if user.role == 'ADMIN' or user.role == 'PACKAGING' %}
+    <a href="{% url 'sale_create' %}" class="btn btn-atrium">
+        <i class="bi bi-cart-plus"></i> Nueva Venta
+    </a>
+    {% endif %}
+</div>
+
+<div class="glass-card">
+    <div class="table-responsive">
+        <table class="table custom-table">
+            <thead>
+                <tr>
+                    <th>Fecha</th>
+                    <th>Producto</th>
+                    <th>Cantidad</th>
+                    <th>Cliente</th>
+                    <th>Total</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for sale in sales %}
+                <tr>
+                    <td class="text-muted small">{{ sale.date|date:"d/m/Y H:i" }}</td>
+                    <td><strong class="text-white">{{ sale.product.name }}</strong></td>
+                    <td>{{ sale.quantity }} uds</td>
+                    <td>{{ sale.customer|default:"<span class='text-muted'>Consumidor Final</span>" }}</td>
+                    <td class="text-success fw-bold">+${{ sale.total_price }}</td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="5" class="text-center text-muted py-4">No hay ventas registradas.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

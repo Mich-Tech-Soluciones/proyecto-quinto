@@ -1,0 +1,241 @@
+{% extends "base.html" %}
+
+{% block page_title %}Punto de Venta (POS){% endblock %}
+
+{% block content %}
+<form method="POST" enctype="multipart/form-data" id="posForm">
+    {% csrf_token %}
+    <input type="hidden" name="cart_data" id="cartData">
+    
+    <div class="row g-4">
+        <!-- Columna Izquierda: Datos del cliente -->
+        <div class="col-lg-5">
+            <div class="glass-card h-100 shadow-lg">
+                <h5 class="fw-bold text-white mb-4"><i class="bi bi-person-fill me-2 text-atrium"></i> Datos del Cliente</h5>
+                <div class="row g-3">
+                    <div class="col-12">
+                        <label class="form-label small text-white-50 fw-bold uppercase">Nombre / Institución <span class="text-danger">*</span></label>
+                        <input type="text" name="nombre" class="form-control" required placeholder="Ej: Juan Pérez">
+                    </div>
+                    <div class="col-6">
+                        <label class="form-label small text-white-50 fw-bold uppercase">Empresa / Club</label>
+                        <input type="text" name="empresa" class="form-control" placeholder="Ej: Club Olimpia">
+                    </div>
+                    <div class="col-6">
+                        <label class="form-label small text-white-50 fw-bold uppercase">Teléfono</label>
+                        <input type="text" name="telefono" class="form-control">
+                    </div>
+                    <div class="col-12">
+                        <label class="form-label small text-white-50 fw-bold uppercase">Email</label>
+                        <input type="email" name="email" class="form-control">
+                    </div>
+                </div>
+                
+                <hr class="border-secondary my-4">
+                
+                <div class="row g-3">
+                    <div class="col-6">
+                        <label class="form-label small text-white-50 fw-bold uppercase">Método de Pago</label>
+                        <select name="metodo_pago" class="form-select bg-dark border-secondary text-white">
+                            <option value="Efectivo">Efectivo</option>
+                            <option value="Transferencia">Transferencia Bancaria</option>
+                            <option value="Tarjeta">Tarjeta de Crédito/Débito</option>
+                        </select>
+                    </div>
+                    <div class="col-6">
+                        <label class="form-label small text-white-50 fw-bold uppercase">Estado Inicial</label>
+                        <select name="estado" class="form-select bg-dark border-secondary text-white">
+                            <option value="Pendiente">Pendiente</option>
+                            <option value="Enviado">Enviado</option>
+                            <option value="Pagado">Pagado</option>
+                        </select>
+                    </div>
+                    
+                    <div class="col-12 mt-4 p-3 rounded shadow-sm" style="background: rgba(242,232,198,0.05); border: 1px solid rgba(242,232,198,0.2);">
+                        <label class="form-label small text-atrium fw-bold uppercase mb-3"><i class="bi bi-tools me-1"></i> Instrucciones para Producción</label>
+                        <div class="mb-3">
+                            <label class="form-label small text-white-50">Diseño / Logotipo (Imagen)</label>
+                            <input type="file" name="diseno_img" class="form-control" accept="image/*">
+                        </div>
+                        <div>
+                            <label class="form-label small text-white-50">Especificaciones Técnicas</label>
+                            <textarea name="especificaciones" class="form-control" rows="3" placeholder="Ej: Hilo color oro, cuello en V profundo..."></textarea>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Columna Derecha: Carrito -->
+        <div class="col-lg-7">
+            <div class="glass-card shadow-lg h-100 d-flex flex-column">
+                <h5 class="fw-bold text-white mb-3"><i class="bi bi-cart-plus me-2 text-atrium"></i> Detalle de la Venta</h5>
+                
+                <!-- Buscador / Selector de Productos -->
+                <div class="row g-2 mb-3">
+                    <div class="col-md-9">
+                        <select id="productSelect" class="form-select border-atrium bg-dark text-white shadow-sm">
+                            <option value="">-- Seleccionar Producto --</option>
+                            {% for p in products %}
+                            <option value="{{ p.id }}" data-price="{{ p.price }}" data-name="{{ p.name }}">
+                                {{ p.category.catalog.name }} > {{ p.category.name }} | {{ p.name }} (${{ p.price }}) - Stock: {{ p.stock }}
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <button type="button" class="btn btn-atrium w-100 fw-bold" onclick="addToCart()"><i class="bi bi-plus-lg"></i> Agregar</button>
+                    </div>
+                </div>
+                
+                <!-- Tabla Carrito -->
+                <div class="table-responsive flex-grow-1" style="min-height: 250px;">
+                    <table class="table custom-table align-middle" id="cartTable">
+                        <thead>
+                            <tr>
+                                <th>Producto</th>
+                                <th style="width: 100px;">Talla</th>
+                                <th style="width: 100px;">Precio</th>
+                                <th style="width: 90px;">Cant.</th>
+                                <th>Subtotal</th>
+                                <th class="text-end"></th>
+                            </tr>
+                        </thead>
+                        <tbody id="cartBody">
+                            <!-- JS fill -->
+                        </tbody>
+                    </table>
+                </div>
+                
+                <!-- Totales -->
+                <div class="mt-auto pt-3 border-top border-secondary">
+                    <div class="row g-3 align-items-center">
+                        <div class="col-md-6">
+                            <label class="form-label small text-white-50 fw-bold uppercase">Abono Inicial / Adelanto ($)</label>
+                            <input type="number" step="0.01" name="abono" id="abonoInput" class="form-control text-warning fw-bold bg-dark border-secondary" value="0.00" onchange="calculateTotals()" onkeyup="calculateTotals()">
+                        </div>
+                        <div class="col-md-6 text-end">
+                            <div class="text-white-50 small mb-1">Total General</div>
+                            <h2 class="fw-800 text-atrium mb-0" id="totalDisplay">$0.00</h2>
+                            <div class="small mt-1 text-danger fw-bold" id="saldoDisplay" style="display: none;">Saldo a pagar: $0.00</div>
+                        </div>
+                    </div>
+                    
+                    <button type="submit" class="btn btn-atrium btn-lg w-100 mt-4 fw-bold py-3 shadow-lg" style="letter-spacing: 1px;">
+                        <i class="bi bi-check2-circle fs-5 me-2"></i> CONFIRMAR VENTA
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>
+
+    <!-- SweetAlert2 CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+        let cart = [];
+
+        function addToCart() {
+            const select = document.getElementById('productSelect');
+            if (!select.value) return;
+            
+            const option = select.options[select.selectedIndex];
+            
+            // Check if already in cart
+            if(cart.find(i => i.id === select.value)) {
+                Swal.fire({
+                    icon: 'info',
+                    title: 'Producto ya agregado',
+                    text: 'Este producto ya está en tu lista. Si deseas llevar más de uno, por favor cambia el número en la casilla de "Cantidad" de la tabla de abajo.',
+                    confirmButtonColor: '#f2e8c6',
+                    confirmButtonText: '<span class="text-dark fw-bold">Entendido</span>',
+                    background: '#1a1a1a',
+                    color: '#fff'
+                });
+                return;
+            }
+
+            cart.push({
+                id: select.value,
+                name: option.getAttribute('data-name'),
+                price: parseFloat(option.getAttribute('data-price')),
+                size: 'M', // default
+                quantity: 1
+            });
+            
+            renderCart();
+        }
+
+        function renderCart() {
+            const tbody = document.getElementById('cartBody');
+            tbody.innerHTML = '';
+            
+            cart.forEach((item, index) => {
+                const tr = document.createElement('tr');
+                
+                tr.innerHTML = `
+                    <td class="fw-bold text-white">${item.name}</td>
+                    <td><input type="text" class="form-control form-control-sm bg-dark text-white border-secondary text-center" value="${item.size}" onchange="updateItem(${index}, 'size', this.value)"></td>
+                    <td><input type="number" step="0.01" class="form-control form-control-sm bg-dark text-white border-secondary text-center" value="${item.price}" onchange="updateItem(${index}, 'price', this.value)"></td>
+                    <td><input type="number" min="1" class="form-control form-control-sm border-atrium text-center fw-bold" value="${item.quantity}" onchange="updateItem(${index}, 'quantity', this.value)"></td>
+                    <td class="fw-bold">$${(item.price * item.quantity).toFixed(2)}</td>
+                    <td class="text-end">
+                        <button type="button" class="btn btn-sm btn-outline-danger" onclick="removeItem(${index})"><i class="bi bi-trash"></i></button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+            
+            calculateTotals();
+        }
+
+        function updateItem(index, field, value) {
+            if(field === 'price' || field === 'quantity') {
+                cart[index][field] = parseFloat(value) || 0;
+            } else {
+                cart[index][field] = value;
+            }
+            renderCart();
+        }
+
+        function removeItem(index) {
+            cart.splice(index, 1);
+            renderCart();
+        }
+
+        function calculateTotals() {
+            const total = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+            document.getElementById('totalDisplay').textContent = '$' + total.toFixed(2);
+            
+            const abono = parseFloat(document.getElementById('abonoInput').value) || 0;
+            const saldo = total - abono;
+            
+            const saldoDisplay = document.getElementById('saldoDisplay');
+            if (saldo > 0 && abono > 0) {
+                saldoDisplay.style.display = 'block';
+                saldoDisplay.textContent = 'Saldo pendiente: $' + saldo.toFixed(2);
+            } else {
+                saldoDisplay.style.display = 'none';
+            }
+            
+            // Update hidden field
+            document.getElementById('cartData').value = JSON.stringify(cart);
+        }
+        
+        // Prevent form submission if cart is empty
+        document.getElementById('posForm').addEventListener('submit', function(e) {
+            if (cart.length === 0) {
+                e.preventDefault();
+                Swal.fire({
+                    icon: 'warning',
+                    title: '¡La lista está vacía!',
+                    text: 'No has seleccionado qué vas a vender. Por favor, elige un producto de la lista desplegable y presiona "Agregar" antes de intentar guardar.',
+                    confirmButtonColor: '#f2e8c6',
+                    confirmButtonText: '<span class="text-dark fw-bold">Aceptar</span>',
+                    background: '#1a1a1a',
+                    color: '#fff'
+                });
+            }
+        });
+    </script>
+{% endblock %}

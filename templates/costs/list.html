@@ -1,0 +1,72 @@
+{% extends "base.html" %}
+
+{% block page_title %}Control de Costos Operativos{% endblock %}
+
+{% block content %}
+<div class="row g-4">
+    <!-- Agregar Costo -->
+    <div class="col-lg-4">
+        <div class="glass-card shadow-lg h-100">
+            <h5 class="fw-bold text-white mb-4"><i class="bi bi-currency-dollar me-2 text-atrium"></i> Registrar Nuevo Costo</h5>
+            <form method="POST">
+                {% csrf_token %}
+                <div class="mb-3">
+                    <label class="form-label text-white-50 small fw-bold uppercase">Descripción del Gasto / Material</label>
+                    <input type="text" name="description" class="form-control" required placeholder="Ej: Compra de hilos color oro">
+                </div>
+                <div class="mb-3">
+                    <label class="form-label text-white-50 small fw-bold uppercase">Monto ($)</label>
+                    <input type="number" step="0.01" name="amount" class="form-control text-warning fw-bold fs-5" required>
+                </div>
+                <div class="mb-4">
+                    <label class="form-label text-white-50 small fw-bold uppercase">Asociar a Pedido (Opcional)</label>
+                    <select name="order_id" class="form-select">
+                        <option value="">-- Costo Operativo General --</option>
+                        {% for order in orders %}
+                        <option value="{{ order.id }}">Pedido #{{ order.id }} - {{ order.customer_name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <button type="submit" class="btn btn-atrium w-100 py-2 fw-bold">GUARDAR COSTO</button>
+            </form>
+        </div>
+    </div>
+    
+    <!-- Historial de Costos -->
+    <div class="col-lg-8">
+        <div class="glass-card shadow-lg h-100">
+            <h5 class="fw-bold text-white mb-4"><i class="bi bi-list-columns-reverse me-2 text-atrium"></i> Historial de Egresos</h5>
+            <div class="table-responsive">
+                <table class="table custom-table align-middle">
+                    <thead>
+                        <tr>
+                            <th>Fecha</th>
+                            <th>Descripción</th>
+                            <th>Vinculado a Pedido</th>
+                            <th class="text-end">Monto</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for c in costs %}
+                        <tr>
+                            <td class="text-white-50">{{ c.date|date:"d M Y" }}</td>
+                            <td class="fw-bold text-white">{{ c.description }}</td>
+                            <td>
+                                {% if c.order %}
+                                    <span class="badge bg-dark border border-secondary text-atrium">Pedido #{{ c.order.id }}</span>
+                                {% else %}
+                                    <span class="badge bg-secondary">Gasto General</span>
+                                {% endif %}
+                            </td>
+                            <td class="text-end fw-bold text-warning">${{ c.amount }}</td>
+                        </tr>
+                        {% empty %}
+                        <tr><td colspan="4" class="text-center text-muted py-5">No hay costos registrados.</td></tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

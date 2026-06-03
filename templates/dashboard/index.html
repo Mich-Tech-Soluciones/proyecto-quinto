@@ -1,0 +1,75 @@
+{% extends "base.html" %}
+
+{% block page_title %}Dashboard General{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div class="text-muted">Resumen de Operaciones</div>
+</div>
+
+<div class="row g-4 mb-5">
+    <div class="col-md-3">
+        <div class="glass-card stat-card border-bottom border-primary border-4 text-center">
+            <div class="text-muted small text-uppercase mb-2">Total Productos</div>
+            <div class="stat-value text-white">1,250</div>
+        </div>
+    </div>
+    
+    <div class="col-md-3">
+        <div class="glass-card stat-card border-bottom border-success border-4 text-center">
+            <div class="text-muted small text-uppercase mb-2">Ventas del Mes</div>
+            <div class="stat-value text-success">$45,300</div>
+        </div>
+    </div>
+    
+    <div class="col-md-3">
+        <div class="glass-card stat-card border-bottom border-warning border-4 text-center">
+            <div class="text-muted small text-uppercase mb-2">En Producción</div>
+            <div class="stat-value text-warning">12</div>
+        </div>
+    </div>
+    
+    <div class="col-md-3">
+        <div class="glass-card stat-card border-bottom border-danger border-4 text-center">
+            <div class="text-muted small text-uppercase mb-2">Costos</div>
+            <div class="stat-value text-danger">$12,400</div>
+        </div>
+    </div>
+</div>
+
+<div class="glass-card">
+    <h5 class="mb-4" style="color: var(--kaza-cream);">Actividad Reciente</h5>
+    <div class="table-responsive">
+        <table class="table custom-table">
+            <thead>
+                <tr>
+                    <th>Fecha</th>
+                    <th>Módulo</th>
+                    <th>Descripción</th>
+                    <th>Usuario</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td class="text-muted">Hoy, 10:30 AM</td>
+                    <td><span class="badge bg-primary bg-opacity-25 text-primary">Ventas</span></td>
+                    <td>Nueva venta registrada #1042</td>
+                    <td>maria_ventas</td>
+                </tr>
+                <tr>
+                    <td class="text-muted">Ayer, 16:45 PM</td>
+                    <td><span class="badge bg-warning bg-opacity-25 text-warning">Producción</span></td>
+                    <td>Iniciado proceso Lote A-99</td>
+                    <td>carlos_prod</td>
+                </tr>
+                <tr>
+                    <td class="text-muted">Ayer, 09:15 AM</td>
+                    <td><span class="badge bg-success bg-opacity-25 text-success">Inventario</span></td>
+                    <td>Actualización de stock (+50)</td>
+                    <td>admin</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

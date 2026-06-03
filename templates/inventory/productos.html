@@ -1,0 +1,296 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block page_title %}Gestión de Inventario{% endblock %}
+
+{% block content %}
+<div class="row g-4">
+    <!-- Formulario agregar/editar -->
+    <div class="col-lg-4">
+        <div class="glass-card shadow-lg h-100">
+            <h4 class="fw-bold mb-4 text-atrium border-bottom pb-2 d-flex justify-content-between align-items-center">
+                <span>
+                    <i class="bi {% if edit_product %}bi-pencil-square{% else %}bi-plus-circle-fill{% endif %} me-2"></i>
+                    {% if edit_product %}Editar Producto #{{ edit_product.id }}{% else %}Agregar Prenda{% endif %}
+                </span>
+                <button type="button" class="btn btn-sm btn-outline-atrium" data-bs-toggle="modal" data-bs-target="#manageCatsModal">
+                    <i class="bi bi-gear-fill"></i>
+                </button>
+            </h4>
+            
+            <form method="POST" enctype="multipart/form-data">
+                {% csrf_token %}
+                <input type="hidden" name="action" value="{% if edit_product %}edit{% else %}add{% endif %}">
+                {% if edit_product %}
+                    <input type="hidden" name="id" value="{{ edit_product.id }}">
+                {% endif %}
+                
+                <div class="mb-3">
+                    <label class="form-label text-white-50 small uppercase fw-bold">Nombre del Producto</label>
+                    <input type="text" name="nombre" class="form-control" value="{% if edit_product %}{{ edit_product.name }}{% endif %}" required placeholder="Ej: Camiseta">
+                </div>
+                
+                <div class="mb-3">
+                    <label class="form-label text-white-50 small uppercase fw-bold">Descripción</label>
+                    <textarea name="descripcion" class="form-control" rows="3">{% if edit_product %}{{ edit_product.description }}{% endif %}</textarea>
+                </div>
+                
+                <div class="mb-3">
+                    <label class="form-label text-white-50 small uppercase fw-bold">Catálogo</label>
+                    <select name="catalogo" id="catalogoSelect" class="form-select" required onchange="updateCategories()">
+                        {% for cat in catalogs %}
+                            <option value="{{ cat.name }}" {% if edit_product and edit_product.catalog.name == cat.name %}selected{% endif %}>{{ cat.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                
+                <div class="mb-3">
+                    <label class="form-label text-white-50 small uppercase fw-bold">Categoría</label>
+                    <select name="categoria" id="categoriaSelect" class="form-select" required>
+                        <!-- Llenado vía JS -->
+                    </select>
+                </div>
+                
+                <div class="row g-3 mb-3">
+                    <div class="col-md-4">
+                        <label class="form-label text-white-50 small uppercase fw-bold">Precio ($)</label>
+                        <input type="number" step="0.01" name="precio" class="form-control" value="{% if edit_product %}{{ edit_product.price }}{% else %}0.00{% endif %}" required>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label text-white-50 small uppercase fw-bold" title="Costo Base">Costo ($)</label>
+                        <input type="number" step="0.01" name="costo" class="form-control border-warning" value="{% if edit_product %}{{ edit_product.cost }}{% else %}0.00{% endif %}" required>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label text-white-50 small uppercase fw-bold">Stock Global</label>
+                        <input type="number" name="stock" class="form-control" value="{% if edit_product %}{{ edit_product.stock }}{% else %}10{% endif %}" required>
+                    </div>
+                </div>
+                
+                <div class="mb-4">
+                    <label class="form-label text-white-50 small uppercase fw-bold">Imagen</label>
+                    <input type="file" name="imagen" class="form-control" accept="image/*">
+                </div>
+                
+                <div class="form-check form-switch mb-4">
+                    <input type="checkbox" name="destacado" class="form-check-input" id="checkDestacado" {% if edit_product and edit_product.featured %}checked{% endif %}>
+                    <label class="form-check-label text-white fw-bold" for="checkDestacado">
+                        <i class="bi bi-star-fill text-warning me-1"></i> Destacar
+                    </label>
+                </div>
+                
+                <button type="submit" class="btn btn-atrium w-100 py-2 fw-bold">
+                    {% if edit_product %}ACTUALIZAR DATOS{% else %}CREAR PRODUCTO{% endif %}
+                </button>
+                
+                {% if edit_product %}
+                    <a href="{% url 'inventory_manage' %}" class="btn btn-dark w-100 mt-2 border-secondary">Cancelar Edición</a>
+                {% endif %}
+            </form>
+        </div>
+    </div>
+    
+    <!-- Tabla de Listado -->
+    <div class="col-lg-8">
+        <div class="glass-card shadow-lg h-100">
+            <div class="d-flex flex-column flex-md-row justify-content-between align-items-center mb-4 border-bottom pb-3 gap-3">
+                <div class="d-flex gap-2 w-100 justify-content-center justify-content-md-start overflow-auto pb-2">
+                    <a href="{% url 'inventory_manage' %}" class="btn btn-sm {% if not catalog_filter %}btn-atrium{% else %}btn-dark border-secondary{% endif %} rounded-pill px-3">Todos</a>
+                    {% for cat in catalogs %}
+                        <a href="{% url 'inventory_manage' %}?filter_catalogo={{ cat.name|urlencode }}" class="btn btn-sm {% if catalog_filter == cat.name %}btn-atrium{% else %}btn-dark border-secondary{% endif %} rounded-pill px-3 text-nowrap">
+                            <i class="bi {{ cat.icon }} me-1"></i> {{ cat.name }}
+                        </a>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <div class="table-responsive">
+                <table class="table custom-table align-middle">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Imagen</th>
+                            <th>Producto</th>
+                            <th>Precio</th>
+                            <th>Stock</th>
+                            <th class="text-end">Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for p in products %}
+                        <tr>
+                            <td><span class="text-white-50">#{{ p.id }}</span></td>
+                            <td>
+                                {% if p.image %}
+                                    <img src="{{ p.image.url }}" class="rounded-circle border border-secondary p-1" width="45" height="45" style="object-fit:cover;">
+                                {% else %}
+                                    <div class="rounded-circle border border-secondary p-1 d-flex align-items-center justify-content-center bg-dark" style="width:45px; height:45px;">
+                                        <i class="bi bi-box text-muted"></i>
+                                    </div>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <div class="fw-bold text-white">
+                                    {% if p.featured %}<i class="bi bi-star-fill text-warning me-1 small"></i>{% endif %}
+                                    {{ p.name }}
+                                </div>
+                                <span class="badge bg-dark border border-secondary text-atrium x-small p-1 px-2">{{ p.category.name|default:"Sin categoría" }}</span>
+                            </td>
+                            <td><span class="fw-bold">${{ p.price }}</span></td>
+                            <td>
+                                <input type="number" 
+                                       min="0"
+                                       class="form-control form-control-sm inline-stock-edit {% if p.stock <= 0 %}bg-danger text-white border-danger{% else %}bg-dark text-white border-secondary{% endif %} text-center" 
+                                       value="{{ p.stock }}" 
+                                       data-id="{{ p.id }}"
+                                       style="width: 80px; transition: 0.3s; border-radius: 8px;">
+                            </td>
+                            <td class="text-end">
+                                <div class="btn-group">
+                                    <a href="?edit={{ p.id }}" class="btn btn-sm btn-outline-warning" title="Editar">
+                                        <i class="bi bi-pencil-fill"></i>
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr><td colspan="6" class="text-center text-muted py-5">No hay productos en esta selección.</td></tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Catalogos/Categorias -->
+<div class="modal fade" id="manageCatsModal" tabindex="-1">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content bg-dark border-secondary text-white" style="border-radius: 20px;">
+            <div class="modal-header border-secondary">
+                <h5 class="modal-title fw-bold text-atrium"><i class="bi bi-gear-fill me-2"></i> Gestionar Líneas de Negocio</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="row g-4">
+                    <div class="col-md-6 border-end border-secondary">
+                        <h6 class="fw-bold mb-3"><i class="bi bi-folder-fill text-atrium me-2"></i> Catálogos</h6>
+                        <ul class="list-group list-group-flush mb-3">
+                            {% for cat in catalogs %}
+                            <li class="list-group-item bg-transparent border-secondary text-white">{{ cat.name }}</li>
+                            {% endfor %}
+                        </ul>
+                        <div class="p-3 glass-card bg-dark border-secondary">
+                            <form method="POST">
+                                {% csrf_token %}
+                                <input type="hidden" name="action" value="add_catalogo">
+                                <label class="small text-white-50 mb-1">Nombre del Catálogo</label>
+                                <input type="text" name="nombre_cat" class="form-control form-control-sm mb-2" required>
+                                <button type="submit" class="btn btn-sm btn-atrium w-100">Añadir</button>
+                            </form>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-6">
+                        <h6 class="fw-bold mb-3"><i class="bi bi-tags-fill text-atrium me-2"></i> Categorías</h6>
+                        <ul class="list-group list-group-flush mb-3">
+                            {% for cat in categories %}
+                            <li class="list-group-item bg-transparent border-secondary text-white">
+                                <span class="badge bg-secondary me-2">{{ cat.catalog.name }}</span> {{ cat.name }}
+                            </li>
+                            {% endfor %}
+                        </ul>
+                        <div class="p-3 glass-card bg-dark border-secondary mt-3">
+                            <form method="POST">
+                                {% csrf_token %}
+                                <input type="hidden" name="action" value="add_categoria">
+                                <label class="small text-white-50 mb-1">Catálogo</label>
+                                <select name="catalogo_id" class="form-select form-select-sm mb-2" required>
+                                    {% for cat in catalogs %}
+                                    <option value="{{ cat.id }}">{{ cat.name }}</option>
+                                    {% endfor %}
+                                </select>
+                                <label class="small text-white-50 mb-1">Nombre Categoría</label>
+                                <input type="text" name="nombre_sub" class="form-control form-control-sm mb-2" required>
+                                <button type="submit" class="btn btn-sm btn-atrium w-100">Añadir</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // JS Logic for dynamically updating the categories dropdown based on the catalog selected
+    const categoriesByCatalog = {
+        {% for cat in catalogs %}
+        "{{ cat.name|escapejs }}": [
+            {% for sub in cat.categories.all %}
+            "{{ sub.name|escapejs }}"{% if not forloop.last %},{% endif %}
+            {% endfor %}
+        ]{% if not forloop.last %},{% endif %}
+        {% endfor %}
+    };
+
+    function updateCategories() {
+        const catSelect = document.getElementById('catalogoSelect');
+        const subSelect = document.getElementById('categoriaSelect');
+        if (!catSelect || !subSelect) return;
+        
+        const catalogName = catSelect.value;
+        const currentSelection = "{% if edit_product %}{{ edit_product.category.name|escapejs }}{% endif %}";
+        
+        subSelect.innerHTML = '';
+        if (categoriesByCatalog[catalogName]) {
+            categoriesByCatalog[catalogName].forEach(sub => {
+                const opt = document.createElement('option');
+                opt.value = sub;
+                opt.textContent = sub;
+                if (sub === currentSelection) opt.selected = true;
+                subSelect.appendChild(opt);
+            });
+        }
+    }
+    
+    document.addEventListener('DOMContentLoaded', function() {
+        updateCategories();
+        
+        // Inline stock editing
+        document.querySelectorAll('.inline-stock-edit').forEach(input => {
+            input.addEventListener('change', function() {
+                const productId = this.getAttribute('data-id');
+                const newStock = this.value;
+                
+                this.style.borderColor = '#f26922'; // Visual feedback
+                
+                const formData = new FormData();
+                formData.append('action', 'update_stock');
+                formData.append('id', productId);
+                formData.append('stock', newStock);
+                formData.append('csrfmiddlewaretoken', '{{ csrf_token }}');
+                
+                fetch('{% url "inventory_manage" %}', {
+                    method: 'POST',
+                    body: formData,
+                    headers: { 'X-Requested-With': 'XMLHttpRequest' }
+                })
+                .then(r => r.json())
+                .then(data => {
+                    if(data.status === 'OK') {
+                        this.style.borderColor = '#2ecc71';
+                        setTimeout(() => this.style.borderColor = 'rgba(255,255,255,0.1)', 1000);
+                        if (parseInt(newStock) <= 0) {
+                            this.classList.replace('bg-dark', 'bg-danger');
+                        } else {
+                            this.classList.replace('bg-danger', 'bg-dark');
+                        }
+                    }
+                });
+            });
+            
+            input.addEventListener('keypress', e => { if (e.key === 'Enter') input.blur(); });
+        });
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+
+{% block page_title %}Inventario{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div class="text-muted">Gestión de Productos</div>
+    <a href="{% url 'product_create' %}" class="btn btn-atrium">
+        <i class="bi bi-plus-lg"></i> Nuevo Producto
+    </a>
+</div>
+
+<div class="glass-card">
+    <div class="table-responsive">
+        <table class="table custom-table">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Nombre</th>
+                    <th>Precio</th>
+                    <th>Stock</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for product in products %}
+                <tr>
+                    <td class="text-muted">#{{ product.id }}</td>
+                    <td><strong class="text-white">{{ product.name }}</strong></td>
+                    <td class="text-success">${{ product.price }}</td>
+                    <td>
+                        {% if product.stock > 10 %}
+                            <span class="badge bg-success bg-opacity-25 text-success">{{ product.stock }}</span>
+                        {% elif product.stock > 0 %}
+                            <span class="badge bg-warning bg-opacity-25 text-warning">{{ product.stock }}</span>
+                        {% else %}
+                            <span class="badge bg-danger bg-opacity-25 text-danger">Agotado</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        <button class="btn btn-outline-atrium btn-sm py-0 px-2"><i class="bi bi-pencil"></i></button>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="5" class="text-center text-muted py-4">No hay productos registrados en el inventario.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}
