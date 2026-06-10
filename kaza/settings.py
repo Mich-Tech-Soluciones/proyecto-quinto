@@ -78,9 +78,9 @@ WSGI_APPLICATION = 'kaza.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'kazabd',
+        'NAME': 'kazadb',
         'USER': 'postgres',
-        'PASSWORD': 'root',
+        'PASSWORD': '123456',
         'HOST': 'localhost',
         'PORT': '5432',
     }
