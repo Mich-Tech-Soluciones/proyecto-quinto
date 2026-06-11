@@ -1,0 +1,22 @@
+"""
+Constantes para la aplicación de usuarios
+"""
+
+# Roles de usuario
+USER_ROLE_ADMIN = 'ADMIN'
+USER_ROLE_DESIGN = 'DESIGN'
+USER_ROLE_CUT = 'CUT'
+USER_ROLE_PRODUCTION = 'PRODUCTION'
+USER_ROLE_PACKAGING = 'PACKAGING'
+
+USER_ROLE_CHOICES = (
+    (USER_ROLE_ADMIN, 'Administrador'),
+    (USER_ROLE_DESIGN, 'Diseñador'),
+    (USER_ROLE_CUT, 'Corte'),
+    (USER_ROLE_PRODUCTION, 'Producción'),
+    (USER_ROLE_PACKAGING, 'Empaquetado'),
+)
+
+# Roles con permisos especiales
+ADMIN_ROLES = [USER_ROLE_ADMIN]
+PRODUCTION_ROLES = [USER_ROLE_PRODUCTION, USER_ROLE_PACKAGING, USER_ROLE_CUT, USER_ROLE_DESIGN]
