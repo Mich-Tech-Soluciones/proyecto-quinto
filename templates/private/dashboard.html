@@ -1,0 +1,76 @@
+{% extends "base.html" %}
+
+{% block page_title %}Dashboard General{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div class="text-muted">Bienvenido, {{ request.user.get_full_name|default:request.user.username }}</div>
+</div>
+
+<div class="row g-4 mb-5">
+    <div class="col-md-6">
+        <div class="glass-card stat-card border-bottom border-primary border-4 text-center">
+            <div class="text-muted small text-uppercase mb-2">Tu Rol</div>
+            <div class="stat-value text-white">{{ request.user.get_role_display }}</div>
+        </div>
+    </div>
+    
+    <div class="col-md-6">
+        <div class="glass-card stat-card border-bottom border-success border-4 text-center">
+            <div class="text-muted small text-uppercase mb-2">Estado</div>
+            <div class="stat-value text-success">Activo</div>
+        </div>
+    </div>
+</div>
+
+<div class="glass-card p-4">
+    <h5 class="text-white mb-4">Acceso Rápido</h5>
+    <div class="row g-3">
+        {% if request.user.role == 'ADMIN' or request.user.role == 'DESIGN' or request.user.is_superuser %}
+        <div class="col-md-4">
+            <a href="{% url 'inventory_manage' %}" class="btn btn-outline-light w-100 py-3">
+                <i class="bi bi-box-seam"></i><br>Inventario
+            </a>
+        </div>
+        {% endif %}
+        
+        {% if request.user.role == 'ADMIN' or request.user.role == 'CUT' or request.user.role == 'PRODUCTION' or request.user.role == 'PACKAGING' or request.user.is_superuser %}
+        <div class="col-md-4">
+            <a href="{% url 'production_manage' %}" class="btn btn-outline-light w-100 py-3">
+                <i class="bi bi-tools"></i><br>Producción
+            </a>
+        </div>
+        {% endif %}
+        
+        {% if request.user.role == 'ADMIN' or request.user.is_superuser %}
+        <div class="col-md-4">
+            <a href="{% url 'costs_manage' %}" class="btn btn-outline-light w-100 py-3">
+                <i class="bi bi-currency-dollar"></i><br>Costos
+            </a>
+        </div>
+        {% endif %}
+        
+        {% if request.user.role == 'ADMIN' or request.user.role == 'DESIGN' or request.user.is_superuser %}
+        <div class="col-md-4">
+            <a href="{% url 'sales_pos' %}" class="btn btn-outline-light w-100 py-3">
+                <i class="bi bi-cart-check"></i><br>Ventas
+            </a>
+        </div>
+        {% endif %}
+        
+        {% if request.user.role == 'ADMIN' or request.user.is_superuser %}
+        <div class="col-md-4">
+            <a href="{% url 'users_manage' %}" class="btn btn-outline-light w-100 py-3">
+                <i class="bi bi-people"></i><br>Usuarios
+            </a>
+        </div>
+        
+        <div class="col-md-4">
+            <a href="/private/admin/" class="btn btn-outline-warning w-100 py-3">
+                <i class="bi bi-gear"></i><br>Administración
+            </a>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
