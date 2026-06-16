@@ -26,36 +26,36 @@
                     <h1 class="text-white fw-bold m-0" style="font-size: 2.5rem; letter-spacing: 3px;">ATS</h1>
                 </a>
                 <div class="nav flex-column">
-                    <a href="{% url 'dashboard' %}" class="sidebar-link {% if request.path == '/' %}active{% endif %}">
+                    <a href="{% url 'dashboard' %}" class="sidebar-link {% if request.path == '/private/' %}active{% endif %}">
                         <i class="bi bi-speedometer2"></i> Dashboard
                     </a>
                     
                     {% if user.role == 'ADMIN' or user.role == 'DESIGN' or user.is_superuser %}
-                    <a href="/inventory/" class="sidebar-link {% if 'inventory' in request.path %}active{% endif %}">
+                    <a href="{% url 'inventory_manage' %}" class="sidebar-link {% if 'inventory' in request.path %}active{% endif %}">
                         <i class="bi bi-box-seam"></i> Inventario
                     </a>
                     {% endif %}
                     
                     {% if user.role == 'ADMIN' or user.role == 'CUT' or user.role == 'PRODUCTION' or user.role == 'PACKAGING' or user.is_superuser %}
-                    <a href="/production/" class="sidebar-link {% if 'production' in request.path %}active{% endif %}">
+                    <a href="{% url 'production_manage' %}" class="sidebar-link {% if 'production' in request.path %}active{% endif %}">
                         <i class="bi bi-tools"></i> Producción
                     </a>
                     {% endif %}
                     
                     {% if user.role == 'ADMIN' or user.is_superuser %}
-                    <a href="/costs/" class="sidebar-link {% if 'costs' in request.path %}active{% endif %}">
+                    <a href="{% url 'costs_manage' %}" class="sidebar-link {% if 'costs' in request.path %}active{% endif %}">
                         <i class="bi bi-currency-dollar"></i> Costos
                     </a>
                     {% endif %}
                     
                     {% if user.role == 'ADMIN' or user.role == 'DESIGN' or user.is_superuser %}
-                    <a href="/sales/" class="sidebar-link {% if 'sales' in request.path %}active{% endif %}">
+                    <a href="{% url 'sales_pos' %}" class="sidebar-link {% if 'sales' in request.path %}active{% endif %}">
                         <i class="bi bi-cart-check"></i> Ventas
                     </a>
                     {% endif %}
                     
                     {% if user.role == 'ADMIN' or user.is_superuser %}
-                    <a href="/users/" class="sidebar-link {% if 'users' in request.path %}active{% endif %}">
+                    <a href="{% url 'users_manage' %}" class="sidebar-link {% if 'users' in request.path %}active{% endif %}">
                         <i class="bi bi-people"></i> Usuarios
                     </a>
                     {% endif %}
