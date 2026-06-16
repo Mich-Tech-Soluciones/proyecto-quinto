@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+
+{% block page_title %}Bienvenido a ATS{% endblock %}
+
+{% block content %}
+<div class="text-center py-5">
+    <h1 class="display-5 text-white mb-3">Bienvenido a ATS</h1>
+    <p class="lead text-secondary mb-4">Sistema de control para producción, inventario, ventas y costos.</p>
+    <div class="d-flex justify-content-center gap-3">
+        {% if user.is_authenticated %}
+            <a href="{% url 'dashboard' %}" class="btn btn-atrium btn-lg">Ir al panel privado</a>
+        {% else %}
+            <a href="{% url 'login' %}" class="btn btn-atrium btn-lg">Iniciar sesión</a>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

@@ -49,4 +49,4 @@ db.sqlite3
 htmlcov/
 
 # Project specific
-KazaBD.sql
+ATSBD.sql

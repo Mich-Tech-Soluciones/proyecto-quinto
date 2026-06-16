@@ -22,7 +22,7 @@ def cache_key(prefix, *args, **kwargs):
     """
     key_data = f"{prefix}:{str(args)}:{str(sorted(kwargs.items()))}"
     hash_obj = hashlib.md5(key_data.encode())
-    return f"kaza:{hash_obj.hexdigest()}"
+    return f"ats:{hash_obj.hexdigest()}"
 
 
 def get_or_cache(key, func, timeout=300):
@@ -53,7 +53,7 @@ def clear_cache_pattern(pattern):
     """
     # Para Django con Redis backend
     try:
-        cache.delete_pattern(f"kaza:{pattern}*")
+        cache.delete_pattern(f"ats:{pattern}*")
     except AttributeError:
         # Si no está disponible el método
         pass

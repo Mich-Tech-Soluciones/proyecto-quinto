@@ -1,11 +1,10 @@
 from django.contrib import admin
 from django.urls import path, include
-from dashboard.views import dashboard_view
+from .views import dashboard_view
 
 urlpatterns = [
-    path('admin/', admin.site.urls),
-    path('accounts/', include('django.contrib.auth.urls')),
     path('', dashboard_view, name='dashboard'),
+    path('admin/', admin.site.urls),
     path('inventory/', include('inventory.urls')),
     path('production/', include('production.urls')),
     path('costs/', include('costs.urls')),

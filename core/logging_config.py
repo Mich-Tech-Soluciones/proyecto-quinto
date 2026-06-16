@@ -34,7 +34,7 @@ LOGGING = {
         'file': {
             'level': 'INFO',
             'class': 'logging.handlers.RotatingFileHandler',
-            'filename': os.path.join('logs', 'kaza.log'),
+            'filename': os.path.join('logs', 'ats.log'),
             'maxBytes': 1024 * 1024 * 10,  # 10MB
             'backupCount': 5,
             'formatter': 'verbose',
@@ -54,7 +54,7 @@ LOGGING = {
             'level': 'INFO',
             'propagate': False,
         },
-        'kaza': {
+        'ats': {
             'handlers': ['console', 'file'],
             'level': 'DEBUG',
             'propagate': False,

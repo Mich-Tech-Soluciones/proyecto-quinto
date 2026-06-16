@@ -6,8 +6,8 @@ import os
 from pathlib import Path
 
 # Información del proyecto
-PROJECT_NAME = 'Kaza'
-PROJECT_DESCRIPTION = 'Sistema de Gestión de Producción y Ventas'
+PROJECT_NAME = 'Sistema de Tracking de Pedidos Atrium Sport (ATS)'
+PROJECT_DESCRIPTION = 'Sistema de Tracking de Pedidos Atrium Sport (ATS)'
 PROJECT_VERSION = '1.0.0'
 
 # Directorios
@@ -50,7 +50,7 @@ CONTEXT_PROCESSORS_CUSTOM = [
 CACHES = {
     'default': {
         'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
-        'LOCATION': 'kaza-cache',
+        'LOCATION': 'ats-cache',
     }
 }
 
@@ -71,7 +71,7 @@ SECURE_CONTENT_SECURITY_POLICY = {
 # Datos de ejemplo para desarrollo
 DEMO_DATA = {
     'admin_username': 'admin',
-    'admin_email': 'admin@kaza.local',
+    'admin_email': 'admin@ats.local',
     'demo_users': [
         {'username': 'designer', 'role': 'DESIGN'},
         {'username': 'cutter', 'role': 'CUT'},
@@ -110,7 +110,7 @@ def get_production_settings():
     """Retorna configuraciones de producción"""
     return {
         'DEBUG': False,
-        'ALLOWED_HOSTS': ['kaza.example.com'],
+        'ALLOWED_HOSTS': ['ats.example.com'],
         'LOG_LEVEL': 'WARNING',
         'SECURE_SSL_REDIRECT': True,
         'SESSION_COOKIE_SECURE': True,
