@@ -3,31 +3,31 @@ Excepciones personalizadas para el proyecto
 """
 
 
-class KazaException(Exception):
+class ATSException(Exception):
     """Excepción base para el proyecto"""
     pass
 
 
-class InvalidProductError(KazaException):
+class InvalidProductError(ATSException):
     """Se lanza cuando hay un error con un producto"""
     pass
 
 
-class InsufficientStockError(KazaException):
+class InsufficientStockError(ATSException):
     """Se lanza cuando no hay suficiente stock"""
     pass
 
 
-class InvalidOrderError(KazaException):
+class InvalidOrderError(ATSException):
     """Se lanza cuando hay un error con una orden"""
     pass
 
 
-class PaymentError(KazaException):
+class PaymentError(ATSException):
     """Se lanza cuando hay un error en el pago"""
     pass
 
 
-class InvalidProductionStatusError(KazaException):
+class InvalidProductionStatusError(ATSException):
     """Se lanza cuando hay un error con el estado de producción"""
     pass
