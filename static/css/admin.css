@@ -1,6 +1,6 @@
 :root {
-  --kaza-cream: #F2E8C6;
-  --kaza-cream-hover: #DBCFA6;
+  --ats-cream: #F2E8C6;
+  --ats-cream-hover: #DBCFA6;
   --dark-bg: #111111;
   --dark-card: rgba(255, 255, 255, 0.05);
   --glass-border: rgba(255, 255, 255, 0.1);
@@ -27,7 +27,6 @@ body {
   background: var(--dark-card);
   backdrop-filter: blur(10px);
   border: 1px solid var(--glass-border);
-  border-radius: 15px;
   padding: 20px;
   transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
@@ -56,7 +55,7 @@ body {
 .mobile-sidebar-offcanvas {
     background: rgba(0,0,0,0.92) !important;
     backdrop-filter: blur(20px);
-    border-right: 1px solid var(--kaza-cream);
+    border-right: 1px solid var(--ats-cream);
     width: 280px !important;
 }
 
@@ -78,11 +77,11 @@ body {
 
 .sidebar-link:hover, .sidebar-link.active {
   background: rgba(242, 232, 198, 0.1);
-  color: var(--kaza-cream);
+  color: var(--ats-cream);
 }
 
 .sidebar-link.active {
-  border-left: 4px solid var(--kaza-cream);
+  border-left: 4px solid var(--ats-cream);
 }
 
 /* Stats Cards */
@@ -105,7 +104,7 @@ body {
 .stat-value {
   font-size: 2.5rem;
   font-weight: 800;
-  color: var(--kaza-cream);
+  color: var(--ats-cream);
 }
 
 /* Custom Table */
@@ -117,7 +116,7 @@ body {
 .custom-table thead th {
   border-top: none;
   border-bottom: 2px solid var(--glass-border);
-  color: var(--kaza-cream);
+  color: var(--ats-cream);
   text-transform: uppercase;
   font-size: 0.8rem;
   letter-spacing: 1px;
@@ -141,7 +140,7 @@ body {
 .card-header {
     background: rgba(255,255,255,0.02) !important;
     border-bottom: 1px solid var(--glass-border) !important;
-    color: var(--kaza-cream) !important;
+    color: var(--ats-cream) !important;
 }
 .card-body {
     background: transparent !important;
@@ -156,7 +155,7 @@ body {
 .form-control:focus, .form-select:focus {
     background-color: rgba(0,0,0,0.6) !important;
     box-shadow: 0 0 0 0.2rem rgba(242, 232, 198, 0.25) !important;
-    border-color: var(--kaza-cream) !important;
+    border-color: var(--ats-cream) !important;
 }
 .form-control::placeholder {
     color: rgba(255,255,255,0.4) !important;
@@ -182,7 +181,7 @@ input:-webkit-autofill:active {
 
 /* Button Styling */
 .btn-atrium {
-  background: var(--kaza-cream);
+  background: var(--ats-cream);
   color: #111; /* Dark text for cream button */
   border: none;
   border-radius: 50px;
@@ -192,21 +191,21 @@ input:-webkit-autofill:active {
 }
 
 .btn-atrium:hover {
-  background: var(--kaza-cream-hover);
+  background: var(--ats-cream-hover);
   color: #111;
   transform: scale(1.05);
 }
 
 .btn-outline-atrium {
-    border: 1px solid var(--kaza-cream);
-    color: var(--kaza-cream);
+    border: 1px solid var(--ats-cream);
+    color: var(--ats-cream);
     border-radius: 50px;
     padding: 6px 15px;
     transition: 0.3s;
 }
 
 .btn-outline-atrium:hover {
-    background: var(--kaza-cream);
+    background: var(--ats-cream);
     color: #111;
 }
 
@@ -225,7 +224,7 @@ input:-webkit-autofill:active {
 
 .form-control:focus, .form-select:focus {
   background: rgba(255,255,255,0.1);
-  border-color: var(--kaza-cream);
+  border-color: var(--ats-cream);
   color: white;
   box-shadow: none;
 }
@@ -246,6 +245,6 @@ input:-webkit-autofill:active {
 
 /* Neon Glow Effects */
 .neon-border {
-    border: 1px solid var(--kaza-cream) !important;
+    border: 1px solid var(--ats-cream) !important;
     box-shadow: 0 0 15px rgba(242, 232, 198, 0.4);
 }
