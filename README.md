@@ -1,8 +1,9 @@
-# Kaza - Sistema de Gestión de Producción y Ventas
+
+# Sistema de Tracking de Pedidos Atrium Sport (ATS)
 
 ## Descripción
 
-Kaza es un sistema web integral de gestión de producción y ventas desarrollado con Django. Está diseñado para empresas que necesitan administrar:
+Sistema de Tracking de Pedidos Atrium Sport (ATS) es un sistema web integral de gestión de pedidos, producción y ventas desarrollado con Django. Está diseñado para empresas que necesitan administrar:
 
 - **Inventario**: Gestión de productos, catálogos y categorías
 - **Producción**: Seguimiento de órdenes de producción y hojas de producción
@@ -77,7 +78,7 @@ python manage.py runserver
 
 ```
 proyecto-quinto/
-├── kaza/                 # Configuración principal
+├── ats/                 # Configuración principal
 ├── core/                 # Módulo core con utilidades
 ├── users/                # Módulo de usuarios
 ├── inventory/            # Módulo de inventario
