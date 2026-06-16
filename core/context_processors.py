@@ -10,8 +10,8 @@ def site_context(request):
     Contexto global para todas las templates
     """
     return {
-        'site_name': 'Kaza',
-        'site_title': 'Kaza - Sistema de Gestión',
+        'site_name': 'Sistema de Tracking de Pedidos Atrium Sport (ATS)',
+        'site_title': 'ATS - Sistema de Tracking de Pedidos',
         'debug': settings.DEBUG,
         'user': request.user,
     }
