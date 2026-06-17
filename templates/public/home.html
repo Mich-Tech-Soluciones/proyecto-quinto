@@ -1,7 +1,7 @@
 {% extends 'public/base_public.html' %}
 {% load static %}
 
-{% block title %}Kaza | Inicio{% endblock %}
+{% block title %}Kaza Stylus | Inicio{% endblock %}
 
 {% block extra_css %}
 <style>
@@ -191,7 +191,7 @@
     <div class="hero-bg"></div>
     <div class="hero-content">
         <div class="hero-eyebrow">Nueva Colección 2025</div>
-        <h1 class="hero-title">Estilo que<br><span>te Define</span></h1>
+        <h1 class="hero-title">Tu Estilo,<br><span>Tu Identidad</span></h1>
         <div class="hero-actions">
             <a href="{% url 'public_shop' %}" class="kaza-btn kaza-btn-primary">Ver Colección</a>
             <a href="{% url 'public_checkout' %}" class="kaza-btn kaza-btn-outline">Mi Pedido</a>
@@ -247,7 +247,7 @@
                     </div>
                 </a>
                 <div class="product-card-body">
-                    <div class="product-card-catalog">{{ product.catalog.name|default:"Kaza" }}</div>
+                    <div class="product-card-catalog">{{ product.catalog.name|default:"Kaza Stylus" }}</div>
                     <div class="product-card-name">{{ product.name }}</div>
                     <div class="product-card-price">${{ product.price }}</div>
                 </div>
@@ -270,7 +270,7 @@
                     </div>
                 </a>
                 <div class="product-card-body">
-                    <div class="product-card-catalog">{{ product.catalog.name|default:"Kaza" }}</div>
+                    <div class="product-card-catalog">{{ product.catalog.name|default:"Kaza Stylus" }}</div>
                     <div class="product-card-name">{{ product.name }}</div>
                     <div class="product-card-price">${{ product.price }}</div>
                 </div>
@@ -329,7 +329,7 @@
                     </div>
                 </a>
                 <div class="product-card-body">
-                    <div class="product-card-catalog">{{ product.catalog.name|default:"Kaza" }}</div>
+                    <div class="product-card-catalog">{{ product.catalog.name|default:"Kaza Stylus" }}</div>
                     <div class="product-card-name">{{ product.name }}</div>
                     <div class="product-card-price">${{ product.price }}</div>
                 </div>

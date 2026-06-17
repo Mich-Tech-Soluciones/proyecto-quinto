@@ -1,115 +1,318 @@
 {% extends 'base.html' %}
 
-{% block page_title %}Gestión de Usuarios y Roles{% endblock %}
+{% block page_title %}Gestión de Usuarios{% endblock %}
 
 {% block content %}
-<div class="container mt-4">
-  <div class="row g-4">
-    <div class="col-lg-4">
-      <div class="glass-card shadow-lg p-4 h-100">
-        <h5 class="fw-bold text-white mb-4"><i class="bi bi-person-plus-fill me-2 text-atrium"></i> Nuevo Usuario</h5>
-        <form method="post">
-          {% csrf_token %}
-          <input type="hidden" name="action" value="add">
 
-          <div class="mb-3">
-            <label class="form-label">Nombre de Usuario</label>
-            <input class="form-control bg-dark border-secondary text-white" name="username" required>
-          </div>
-
-          <div class="mb-3">
-            <label class="form-label">Correo Electrónico</label>
-            <input class="form-control bg-dark border-secondary text-white" type="email" name="email">
-          </div>
-
-          <div class="mb-3">
-            <label class="form-label">Contraseña</label>
-            <input class="form-control bg-dark border-secondary text-white" type="password" name="password" required>
-          </div>
-
-          <div class="mb-3">
-            <label class="form-label">Rol</label>
-            <select class="form-select bg-dark border-secondary text-white" name="role" required>
-              {% for key, name in roles %}
-              <option value="{{ key }}">{{ name }}</option>
-              {% endfor %}
-            </select>
-          </div>
-
-          <button class="btn btn-atrium w-100 py-2 fw-bold" type="submit">CREAR USUARIO</button>
-        </form>
-      </div>
+{% if messages %}
+<div class="mb-3">
+    {% for msg in messages %}
+    <div class="alert alert-dismissible fade show py-2 px-3 small"
+         style="background:rgba(242,232,198,.08); border:1px solid rgba(242,232,198,.25); color:var(--ats-cream);" role="alert">
+        <i class="bi bi-check-circle-fill me-2"></i>{{ msg }}
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="alert"></button>
     </div>
-
-    <div class="col-lg-8">
-      <div class="glass-card shadow-lg p-4 h-100">
-        <h5 class="fw-bold text-white mb-4"><i class="bi bi-people-fill me-2 text-atrium"></i> Usuarios Activos</h5>
-        <div class="table-responsive">
-          <table class="table custom-table align-middle text-white">
-            <thead>
-              <tr>
-                <th>Usuario</th>
-                <th>Email</th>
-                <th>Rol</th>
-                <th class="text-end">Acciones</th>
-              </tr>
-            </thead>
-            <tbody>
-              {% for u in users %}
-              <tr>
-                <td>
-                  <div class="d-flex align-items-center gap-3">
-                    <div class="rounded-circle bg-dark border border-secondary text-white d-flex align-items-center justify-content-center" style="width:40px; height:40px;">
-                      {{ u.username.0|upper }}
-                    </div>
-                    <div>
-                      <div class="fw-bold text-white">{{ u.username }}</div>
-                      {% if u.is_superuser %}
-                      <span class="badge bg-danger small">SUPERUSER</span>
-                      {% endif %}
-                    </div>
-                  </div>
-                </td>
-                <td class="text-white-50">{{ u.email|default:'-' }}</td>
-                <td>
-                  {% if u.is_superuser %}
-                  <span class="badge bg-secondary">Sin restricciones</span>
-                  {% else %}
-                  <form method="post" class="d-inline">
-                    {% csrf_token %}
-                    <input type="hidden" name="action" value="edit_role">
-                    <input type="hidden" name="user_id" value="{{ u.id }}">
-                    <select name="role" class="form-select form-select-sm bg-dark text-white border-secondary" style="width: 170px;" onchange="this.form.submit()">
-                      {% for key, name in roles %}
-                      <option value="{{ key }}" {% if u.role == key %}selected{% endif %}>{{ name }}</option>
-                      {% endfor %}
-                    </select>
-                  </form>
-                  {% endif %}
-                </td>
-                <td class="text-end">
-                  {% if not u.is_superuser %}
-                  <form method="post" class="d-inline" onsubmit="return confirm('¿Eliminar usuario?');">
-                    {% csrf_token %}
-                    <input type="hidden" name="action" value="delete">
-                    <input type="hidden" name="user_id" value="{{ u.id }}">
-                    <button type="submit" class="btn btn-sm btn-outline-danger" title="Eliminar">
-                      <i class="bi bi-trash-fill"></i>
-                    </button>
-                  </form>
-                  {% endif %}
-                </td>
-              </tr>
-              {% empty %}
-              <tr>
-                <td colspan="4" class="text-center text-muted py-5">No hay usuarios.</td>
-              </tr>
-              {% endfor %}
-            </tbody>
-          </table>
-        </div>
-      </div>
-    </div>
-  </div>
+    {% endfor %}
 </div>
+{% endif %}
+
+<div class="container mt-2">
+    <div class="row g-4">
+
+        <!-- ── FORMULARIO CREAR USUARIO ────────────────────────── -->
+        <div class="col-lg-4">
+            <div class="glass-card shadow-lg p-4 h-100">
+                <h5 class="fw-bold text-white mb-4">
+                    <i class="bi bi-person-plus-fill me-2 text-atrium"></i> Nuevo Usuario
+                </h5>
+                <form method="post">
+                    {% csrf_token %}
+                    <input type="hidden" name="action" value="add">
+
+                    <div class="mb-3">
+                        <label class="form-label small text-white-50">Nombre de Usuario *</label>
+                        <input class="form-control bg-dark border-secondary text-white" name="username" required placeholder="usuario123">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label small text-white-50">Correo Electrónico</label>
+                        <input class="form-control bg-dark border-secondary text-white" type="email" name="email" placeholder="correo@ejemplo.com">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label small text-white-50">Contraseña *</label>
+                        <input class="form-control bg-dark border-secondary text-white" type="password" name="password" required placeholder="••••••••">
+                    </div>
+                    <div class="mb-4">
+                        <label class="form-label small text-white-50">Rol</label>
+                        <select class="form-select bg-dark border-secondary text-white" name="role" required>
+                            {% for key, name in roles %}
+                            <option value="{{ key }}">{{ name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <button class="btn btn-atrium w-100 py-2 fw-bold" type="submit">
+                        <i class="bi bi-person-plus me-1"></i> CREAR USUARIO
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <!-- ── LISTADO DE USUARIOS ──────────────────────────────── -->
+        <div class="col-lg-8">
+            <div class="glass-card shadow-lg p-4">
+                <div class="d-flex align-items-center justify-content-between mb-4">
+                    <h5 class="fw-bold text-white mb-0">
+                        <i class="bi bi-people-fill me-2 text-atrium"></i> Usuarios Activos
+                    </h5>
+                    <span class="badge bg-secondary rounded-pill">{{ users|length }} usuario{{ users|length|pluralize:"s" }}</span>
+                </div>
+
+                <div class="table-responsive">
+                    <table class="table custom-table align-middle text-white">
+                        <thead>
+                            <tr>
+                                <th>Usuario</th>
+                                <th>Email</th>
+                                <th>Rol</th>
+                                <th class="text-end">Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for u in users %}
+                            <tr>
+                                <!-- Avatar + nombre -->
+                                <td>
+                                    <div class="d-flex align-items-center gap-3">
+                                        <div class="rounded-circle d-flex align-items-center justify-content-center fw-bold"
+                                             style="width:38px;height:38px;background:rgba(242,232,198,.12);color:var(--ats-cream);font-size:14px;border:1px solid rgba(242,232,198,.2);">
+                                            {{ u.username.0|upper }}
+                                        </div>
+                                        <div>
+                                            <div class="fw-bold text-white">{{ u.username }}</div>
+                                            {% if u.is_superuser %}
+                                            <span class="badge bg-danger" style="font-size:9px;">SUPERUSER</span>
+                                            {% endif %}
+                                            {% if u == request.user %}
+                                            <span class="badge bg-secondary" style="font-size:9px;">Tú</span>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                </td>
+
+                                <!-- Email -->
+                                <td class="text-white-50" style="font-size:13px;">{{ u.email|default:'—' }}</td>
+
+                                <!-- Rol selector inline -->
+                                <td>
+                                    {% if u.is_superuser %}
+                                    <span class="badge bg-secondary">Sin restricciones</span>
+                                    {% else %}
+                                    <form method="post" class="d-inline">
+                                        {% csrf_token %}
+                                        <input type="hidden" name="action" value="edit_role">
+                                        <input type="hidden" name="user_id" value="{{ u.id }}">
+                                        <select name="role"
+                                                class="form-select form-select-sm bg-dark text-white border-secondary"
+                                                style="width:155px;"
+                                                onchange="this.form.submit()">
+                                            {% for key, name in roles %}
+                                            <option value="{{ key }}" {% if u.role == key %}selected{% endif %}>{{ name }}</option>
+                                            {% endfor %}
+                                        </select>
+                                    </form>
+                                    {% endif %}
+                                </td>
+
+                                <!-- Acciones -->
+                                <td class="text-end">
+                                    {% if u != request.user %}
+                                    <div class="d-flex gap-2 justify-content-end">
+
+                                        <!-- ✏️ Botón Editar — solo ADMIN / Superuser -->
+                                        {% if not u.is_superuser %}
+                                        <button type="button"
+                                                class="btn btn-sm btn-outline-warning"
+                                                title="Editar usuario"
+                                                data-bs-toggle="modal"
+                                                data-bs-target="#editUserModal"
+                                                data-userid="{{ u.id }}"
+                                                data-username="{{ u.username }}"
+                                                data-email="{{ u.email|default:'' }}"
+                                                data-role="{{ u.role }}">
+                                            <i class="bi bi-pencil-fill"></i> Editar
+                                        </button>
+                                        {% endif %}
+
+                                        <!-- 🗑️ Botón Eliminar -->
+                                        {% if not u.is_superuser %}
+                                        <form method="post" class="d-inline"
+                                              onsubmit="return confirm('¿Eliminar a {{ u.username }}? Esta acción no se puede deshacer.');">
+                                            {% csrf_token %}
+                                            <input type="hidden" name="action" value="delete">
+                                            <input type="hidden" name="user_id" value="{{ u.id }}">
+                                            <button type="submit" class="btn btn-sm btn-outline-danger" title="Eliminar">
+                                                <i class="bi bi-trash-fill"></i>
+                                            </button>
+                                        </form>
+                                        {% endif %}
+                                    </div>
+                                    {% else %}
+                                    <span class="badge bg-secondary" style="font-size:9px;">Cuenta actual</span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="4" class="text-center text-muted py-5">
+                                    <i class="bi bi-people fs-2 d-block mb-2 opacity-25"></i>
+                                    No hay usuarios registrados.
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block modals %}
+<!-- ══ MODAL EDITAR USUARIO ══════════════════════════════════════
+     Restricción: la vista ManageUsersView exige role=ADMIN en test_func().
+     En el frontend el botón solo aparece para no-superusers.
+ ═══════════════════════════════════════════════════════════════ -->
+<div class="modal fade" id="editUserModal" tabindex="-1" aria-labelledby="editUserModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border border-secondary" style="background:#1a1a1a;">
+
+            <div class="modal-header border-secondary">
+                <h5 class="modal-title fw-bold text-white" id="editUserModalLabel">
+                    <i class="bi bi-pencil-square me-2" style="color:var(--ats-cream);"></i>
+                    Editar Usuario
+                </h5>
+                <button type="button"
+                        class="btn-close btn-close-white"
+                        data-bs-dismiss="modal"
+                        aria-label="Cerrar">
+                </button>
+            </div>
+
+            <form method="post">
+                {% csrf_token %}
+                <input type="hidden" name="action" value="edit">
+                <input type="hidden" name="user_id" id="modal-user-id">
+
+                <div class="modal-body">
+
+                    <!-- Aviso Admin -->
+                    <div class="d-flex align-items-center gap-2 mb-4 p-2 rounded"
+                         style="background:rgba(242,232,198,.07);border:1px solid rgba(242,232,198,.2);">
+                         <i class="bi bi-shield-lock-fill" style="color:var(--ats-cream);"></i>
+                        <span class="small" style="color:var(--ats-cream);">
+                            Acción restringida a <strong>Administradores</strong>
+                        </span>
+                    </div>
+
+                    <!-- Usuario -->
+                    <div class="mb-3">
+                        <label class="form-label small text-white-50">Nombre de Usuario *</label>
+                        <input type="text"
+                               class="form-control bg-dark border-secondary text-white"
+                               name="username"
+                               id="modal-username"
+                               required>
+                    </div>
+
+                    <!-- Email -->
+                    <div class="mb-3">
+                        <label class="form-label small text-white-50">Correo Electrónico</label>
+                        <input type="email"
+                               class="form-control bg-dark border-secondary text-white"
+                               name="email"
+                               id="modal-email"
+                               placeholder="correo@ejemplo.com">
+                    </div>
+
+                    <!-- Rol -->
+                    <div class="mb-3">
+                        <label class="form-label small text-white-50">Rol</label>
+                        <select class="form-select bg-dark border-secondary text-white"
+                                name="role"
+                                id="modal-role">
+                            {% for key, name in roles %}
+                            <option value="{{ key }}">{{ name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <!-- Contraseña nueva (opcional) -->
+                    <div class="mb-1">
+                        <label class="form-label small text-white-50">Nueva Contraseña</label>
+                        <div class="input-group">
+                            <input type="password"
+                                   class="form-control bg-dark border-secondary text-white"
+                                   name="password"
+                                   id="modal-password"
+                                   placeholder="">
+                            <button type="button"
+                                    class="btn btn-outline-secondary"
+                                    onclick="togglePass()"
+                                    title="Ver contraseña">
+                                <i class="bi bi-eye" id="pass-eye"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                </div>
+
+                <div class="modal-footer border-secondary">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-atrium fw-bold px-4">
+                        <i class="bi bi-check2-circle me-1"></i> Guardar Cambios
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+(function () {
+    var modalEl  = document.getElementById('editUserModal');
+
+    // ── Rellenar campos cuando el modal se abre ──────────────────
+    modalEl.addEventListener('show.bs.modal', function (event) {
+        var btn = event.relatedTarget;
+        if (!btn) return;
+
+        document.getElementById('modal-user-id').value  = btn.dataset.userid   || '';
+        document.getElementById('modal-username').value = btn.dataset.username  || '';
+        document.getElementById('modal-email').value    = btn.dataset.email     || '';
+        document.getElementById('modal-password').value = '';
+
+        var role       = btn.dataset.role || '';
+        var roleSelect = document.getElementById('modal-role');
+        for (var i = 0; i < roleSelect.options.length; i++) {
+            roleSelect.options[i].selected = (roleSelect.options[i].value === role);
+        }
+    });
+
+    // ── Mostrar / ocultar contraseña ─────────────────────────────
+    window.togglePass = function () {
+        var input = document.getElementById('modal-password');
+        var icon  = document.getElementById('pass-eye');
+        if (input.type === 'password') {
+            input.type    = 'text';
+            icon.className = 'bi bi-eye-slash';
+        } else {
+            input.type    = 'password';
+            icon.className = 'bi bi-eye';
+        }
+    };
+})();
+</script>
 {% endblock %}

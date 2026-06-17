@@ -1,7 +1,7 @@
 {% extends 'public/base_public.html' %}
 {% load static %}
 
-{% block title %}Tienda | Kaza{% endblock %}
+{% block title %}Tienda | Kaza Stylus{% endblock %}
 
 {% block extra_css %}
 <style>
@@ -257,7 +257,7 @@
                         </div>
                     </a>
                     <div class="product-card-body">
-                        <div class="product-card-catalog">{{ product.catalog.name|default:"Kaza" }}</div>
+                        <div class="product-card-catalog">{{ product.catalog.name|default:"Kaza Stylus" }}</div>
                         <div class="product-card-name">{{ product.name }}</div>
                         <div class="product-card-price">${{ product.price }}</div>
                     </div>

@@ -1,7 +1,7 @@
 {% extends 'public/base_public.html' %}
 {% load static %}
 
-{% block title %}{{ product.name }} | Kaza{% endblock %}
+{% block title %}{{ product.name }} | Kaza Stylus{% endblock %}
 
 {% block extra_css %}
 <style>
@@ -203,7 +203,7 @@
 
             <!-- INFO -->
             <div>
-                <div class="product-eyebrow">{{ product.catalog.name|default:"Kaza" }}</div>
+                <div class="product-eyebrow">{{ product.catalog.name|default:"Kaza Stylus" }}</div>
                 <h1 class="product-title">{{ product.name }}</h1>
                 {% if product.category %}
                 <div class="product-category-tag">{{ product.category.name }}</div>
@@ -230,7 +230,7 @@
                 {% if sizes %}
                 <div class="input-label">
                     Talla &nbsp;
-                    <strong id="selected-size-label">— elige una</strong>
+                    <span id="selected-size-label" style="color:var(--cream); font-size:13px; font-weight:600; letter-spacing:0;">— elige una</span>
                 </div>
                 <div class="size-row" id="size-selector">
                     {% for ps in sizes %}
@@ -248,19 +248,19 @@
                 <!-- Quantity -->
                 <div class="input-label">Cantidad</div>
                 <div class="qty-row">
-                    <button class="qty-btn" onclick="changeQty(-1)">−</button>
+                    <button type="button" class="qty-btn" onclick="changeQty(-1)">−</button>
                     <input type="number" id="qty-input" class="qty-input" value="1" min="1" max="{{ product.stock }}">
-                    <button class="qty-btn" onclick="changeQty(1)">+</button>
+                    <button type="button" class="qty-btn" onclick="changeQty(1)">+</button>
                     <span style="font-size:12px; color:var(--text-muted);">Máx. {{ product.stock }}</span>
                 </div>
 
                 <!-- Add to cart -->
-                <button class="kaza-btn kaza-btn-primary kaza-btn-full" onclick="handleAddToCart()">
+                <button type="button" class="kaza-btn kaza-btn-primary kaza-btn-full" onclick="handleAddToCart()">
                     <i class="fa fa-shopping-bag"></i> Agregar al Carrito
                 </button>
 
                 {% else %}
-                <button class="kaza-btn kaza-btn-outline kaza-btn-full" disabled style="opacity:.4; cursor:not-allowed;">
+                <button type="button" class="kaza-btn kaza-btn-outline kaza-btn-full" disabled style="opacity:.4; cursor:not-allowed;">
                     Agotado
                 </button>
                 {% endif %}
@@ -293,7 +293,7 @@
                         </div>
                     </a>
                     <div class="product-card-body">
-                        <div class="product-card-catalog">{{ rp.catalog.name|default:"Kaza" }}</div>
+                        <div class="product-card-catalog">{{ rp.catalog.name|default:"Kaza Stylus" }}</div>
                         <div class="product-card-name">{{ rp.name }}</div>
                         <div class="product-card-price">${{ rp.price }}</div>
                     </div>
