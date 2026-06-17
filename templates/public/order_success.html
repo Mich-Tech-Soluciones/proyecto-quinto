@@ -1,0 +1,289 @@
+{% extends 'public/base_public.html' %}
+{% load static %}
+
+{% block title %}¡Pedido Confirmado! | Kaza{% endblock %}
+
+{% block extra_css %}
+<style>
+    .success-section {
+        min-height: calc(100vh - 64px);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 60px 0;
+    }
+    .success-card {
+        background: var(--dark-card);
+        border: 1px solid var(--glass-border);
+        border-radius: 16px;
+        padding: 54px 48px;
+        max-width: 580px;
+        width: 100%;
+        text-align: center;
+        animation: fadeUp .5s ease;
+    }
+
+    /* Icon ring */
+    .success-icon-ring {
+        width: 80px; height: 80px;
+        border-radius: 50%;
+        border: 2px solid var(--cream);
+        display: flex; align-items: center; justify-content: center;
+        margin: 0 auto 28px;
+        animation: ringPop .6s .1s ease both;
+    }
+    .success-icon-ring i { font-size: 32px; color: var(--cream); }
+    @keyframes ringPop {
+        0%   { transform: scale(0.4); opacity: 0; }
+        80%  { transform: scale(1.08); }
+        100% { transform: scale(1); opacity: 1; }
+    }
+
+    .success-eyebrow {
+        font-size: 10px; letter-spacing: 4px; text-transform: uppercase;
+        color: var(--cream); margin-bottom: 10px;
+    }
+    .success-title {
+        font-size: 26px; font-weight: 800;
+        color: var(--text-main); margin-bottom: 10px;
+    }
+    .success-subtitle {
+        font-size: 14px; color: var(--text-muted);
+        line-height: 1.7; margin-bottom: 32px;
+    }
+
+    /* Order number chip */
+    .order-number-chip {
+        display: inline-flex; align-items: center; gap: 8px;
+        background: rgba(242,232,198,.08);
+        border: 1px solid rgba(242,232,198,.25);
+        border-radius: 40px;
+        padding: 8px 22px;
+        font-size: 14px; font-weight: 700;
+        color: var(--cream);
+        letter-spacing: 1px;
+        margin-bottom: 32px;
+    }
+    .order-number-chip i { font-size: 12px; }
+
+    /* Detail table */
+    .order-detail-table {
+        background: rgba(0,0,0,.2);
+        border: 1px solid var(--glass-border);
+        border-radius: 10px;
+        overflow: hidden;
+        margin-bottom: 28px;
+        text-align: left;
+    }
+    .order-detail-row {
+        display: flex; justify-content: space-between; align-items: center;
+        padding: 12px 20px;
+        border-bottom: 1px solid var(--glass-border);
+        font-size: 13px;
+    }
+    .order-detail-row:last-child { border-bottom: none; }
+    .detail-key { color: var(--text-muted); }
+    .detail-val { color: var(--text-main); font-weight: 600; }
+    .detail-val.cream { color: var(--cream); }
+
+    /* Items list */
+    .order-items-list {
+        border: 1px solid var(--glass-border);
+        border-radius: 10px;
+        overflow: hidden;
+        margin-bottom: 28px;
+        text-align: left;
+    }
+    .order-items-header {
+        padding: 10px 20px;
+        font-size: 10px; letter-spacing: 2px; text-transform: uppercase;
+        color: var(--cream);
+        background: rgba(242,232,198,.04);
+        border-bottom: 1px solid var(--glass-border);
+    }
+    .order-items-row {
+        display: flex; justify-content: space-between; align-items: center;
+        padding: 12px 20px;
+        border-bottom: 1px solid var(--glass-border);
+        font-size: 13px;
+    }
+    .order-items-row:last-child { border-bottom: none; }
+    .item-name { color: var(--text-main); }
+    .item-meta { font-size: 11px; color: var(--text-muted); }
+    .item-price { color: var(--cream); font-weight: 700; }
+
+    /* Action buttons */
+    .success-actions {
+        display: flex; gap: 12px; justify-content: center; flex-wrap: wrap;
+    }
+
+    /* Info note */
+    .info-note {
+        background: rgba(242,232,198,.05);
+        border: 1px solid rgba(242,232,198,.15);
+        border-left: 3px solid var(--cream);
+        border-radius: 6px;
+        padding: 12px 16px;
+        font-size: 12px; color: var(--text-muted); line-height: 1.6;
+        text-align: left;
+        margin-bottom: 28px;
+    }
+
+    /* Confetti canvas */
+    #confetti-canvas {
+        position: fixed; inset: 0;
+        pointer-events: none; z-index: 0;
+    }
+
+    @media (max-width: 600px) {
+        .success-card { padding: 36px 22px; }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+
+<canvas id="confetti-canvas"></canvas>
+
+<section class="success-section">
+    <div class="kaza-container">
+        <div class="success-card">
+
+            <!-- Icon -->
+            <div class="success-icon-ring">
+                <i class="fa fa-check"></i>
+            </div>
+
+            <!-- Header -->
+            <div class="success-eyebrow">Pedido Recibido</div>
+            <h1 class="success-title">¡Gracias, {{ order.customer_name|truncatewords:2 }}!</h1>
+            <p class="success-subtitle">
+                Tu pedido fue registrado exitosamente.<br>
+                Nos pondremos en contacto contigo para coordinar el pago y la entrega.
+            </p>
+
+            <!-- Order number -->
+            <div class="order-number-chip">
+                <i class="fa fa-tag"></i> Pedido #{{ order.id }}
+            </div>
+
+            <!-- Order details -->
+            <div class="order-detail-table">
+                <div class="order-detail-row">
+                    <span class="detail-key">Cliente</span>
+                    <span class="detail-val">{{ order.customer_name }}</span>
+                </div>
+                {% if order.customer_phone %}
+                <div class="order-detail-row">
+                    <span class="detail-key">Teléfono</span>
+                    <span class="detail-val">{{ order.customer_phone }}</span>
+                </div>
+                {% endif %}
+                {% if order.customer_email %}
+                <div class="order-detail-row">
+                    <span class="detail-key">Email</span>
+                    <span class="detail-val">{{ order.customer_email }}</span>
+                </div>
+                {% endif %}
+                <div class="order-detail-row">
+                    <span class="detail-key">Método de Pago</span>
+                    <span class="detail-val">{{ order.payment_method }}</span>
+                </div>
+                <div class="order-detail-row">
+                    <span class="detail-key">Estado</span>
+                    <span class="detail-val cream">{{ order.status }}</span>
+                </div>
+                <div class="order-detail-row">
+                    <span class="detail-key" style="font-weight:700;">Total</span>
+                    <span class="detail-val cream" style="font-size:17px;">${{ order.total|floatformat:2 }}</span>
+                </div>
+            </div>
+
+            <!-- Items -->
+            {% if order.details.all %}
+            <div class="order-items-list">
+                <div class="order-items-header">Artículos del Pedido</div>
+                {% for detail in order.details.all %}
+                <div class="order-items-row">
+                    <div>
+                        <div class="item-name">{{ detail.custom_name|default:detail.product.name }}</div>
+                        <div class="item-meta">
+                            {% if detail.size %}Talla {{ detail.size }} &middot; {% endif %}
+                            ×{{ detail.quantity }}
+                        </div>
+                    </div>
+                    <div class="item-price">${{ detail.subtotal|floatformat:2 }}</div>
+                </div>
+                {% endfor %}
+            </div>
+            {% endif %}
+
+            <!-- Note -->
+            <div class="info-note">
+                <i class="fa fa-clock-o" style="color:var(--cream);"></i>
+                &nbsp;Pedido realizado el {{ order.created_at|date:"d/m/Y" }} a las {{ order.created_at|date:"H:i" }}
+            </div>
+
+            <!-- Actions -->
+            <div class="success-actions">
+                <a href="{% url 'public_shop' %}" class="kaza-btn kaza-btn-primary">
+                    <i class="fa fa-shopping-bag"></i> &nbsp;Seguir Comprando
+                </a>
+                <a href="{% url 'public_home' %}" class="kaza-btn kaza-btn-outline">
+                    <i class="fa fa-home"></i> &nbsp;Inicio
+                </a>
+            </div>
+
+        </div>
+    </div>
+</section>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+(function() {
+    var canvas = document.getElementById('confetti-canvas');
+    var ctx = canvas.getContext('2d');
+    canvas.width  = window.innerWidth;
+    canvas.height = window.innerHeight;
+
+    var colors = ['#F2E8C6', '#DBCFA6', 'rgba(255,255,255,.7)', '#111', 'rgba(242,232,198,.5)'];
+    var pieces = Array.from({ length: 100 }, function() {
+        return {
+            x: Math.random() * canvas.width,
+            y: Math.random() * -canvas.height,
+            w: Math.random() * 8 + 3,
+            h: Math.random() * 4 + 2,
+            color: colors[Math.floor(Math.random() * colors.length)],
+            speed: Math.random() * 2.5 + 1,
+            angle: Math.random() * 360,
+            spin:  Math.random() * 4 - 2,
+            alpha: 1
+        };
+    });
+
+    var frame = 0, maxFrames = 250;
+    function draw() {
+        if (frame >= maxFrames) { canvas.style.display = 'none'; return; }
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        pieces.forEach(function(p) {
+            p.y     += p.speed;
+            p.angle += p.spin;
+            p.alpha  = Math.max(0, 1 - frame / maxFrames);
+            if (p.y > canvas.height) { p.y = -10; p.x = Math.random() * canvas.width; }
+            ctx.save();
+            ctx.globalAlpha = p.alpha;
+            ctx.translate(p.x, p.y);
+            ctx.rotate(p.angle * Math.PI / 180);
+            ctx.fillStyle = p.color;
+            ctx.fillRect(-p.w / 2, -p.h / 2, p.w, p.h);
+            ctx.restore();
+        });
+        frame++;
+        requestAnimationFrame(draw);
+    }
+    draw();
+})();
+</script>
+{% endblock %}

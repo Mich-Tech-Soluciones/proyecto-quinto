@@ -1,0 +1,825 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="description" content="{% block meta_description %}Kaza - Moda & Estilo{% endblock %}">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>{% block title %}Kaza | Moda & Estilo{% endblock %}</title>
+
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="{% static 'essence/css/font-awesome.min.css' %}">
+    <!-- Owl Carousel -->
+    <link rel="stylesheet" href="{% static 'essence/css/owl.carousel.css' %}">
+
+    <style>
+        /* ── Variables (paleta del admin) ─────────────────── */
+        :root {
+            --cream:        #F2E8C6;
+            --cream-hover:  #DBCFA6;
+            --dark-bg:      #111111;
+            --dark-card:    rgba(255, 255, 255, 0.05);
+            --glass-border: rgba(255, 255, 255, 0.10);
+            --text-main:    #ffffff;
+            --text-muted:   rgba(255, 255, 255, 0.55);
+        }
+
+        /* ── Reset base ───────────────────────────────────── */
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        html { scroll-behavior: smooth; }
+        body {
+            background: var(--dark-bg);
+            color: var(--text-main);
+            font-family: 'Inter', sans-serif;
+            overflow-x: hidden;
+            -webkit-tap-highlight-color: transparent;
+        }
+        a { text-decoration: none; color: inherit; }
+        img { max-width: 100%; display: block; }
+
+        /* ── Scrollbar ────────────────────────────────────── */
+        ::-webkit-scrollbar { width: 4px; }
+        ::-webkit-scrollbar-track { background: var(--dark-bg); }
+        ::-webkit-scrollbar-thumb { background: var(--cream); border-radius: 4px; }
+
+        /* ── HEADER ───────────────────────────────────────── */
+        .kaza-header {
+            position: fixed;
+            top: 0; left: 0; right: 0;
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 40px;
+            height: 64px;
+            background: rgba(17, 17, 17, 0.85);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--glass-border);
+            transition: background 0.3s;
+        }
+        .kaza-header.scrolled {
+            background: rgba(17,17,17,0.98);
+        }
+
+        /* Logo */
+        .kaza-logo img { height: 38px; width: auto; }
+
+        /* Nav */
+        .kaza-nav { display: flex; gap: 6px; }
+        .kaza-nav a {
+            color: var(--text-muted);
+            font-size: 13px;
+            font-weight: 500;
+            letter-spacing: .5px;
+            padding: 6px 14px;
+            border-radius: 6px;
+            transition: color .2s, background .2s;
+        }
+        .kaza-nav a:hover, .kaza-nav a.active {
+            color: var(--cream);
+            background: rgba(242,232,198,.08);
+        }
+
+        /* Header actions */
+        .kaza-header-actions { display: flex; align-items: center; gap: 18px; }
+
+        /* Search */
+        .kaza-search { display: flex; align-items: center; gap: 8px; }
+        .kaza-search input {
+            background: rgba(255,255,255,.06);
+            border: 1px solid var(--glass-border);
+            color: var(--text-main);
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 13px;
+            width: 180px;
+            outline: none;
+            transition: border-color .2s, width .3s;
+        }
+        .kaza-search input:focus { border-color: var(--cream); width: 220px; }
+        .kaza-search input::placeholder { color: var(--text-muted); }
+        .kaza-search button {
+            background: transparent;
+            border: none;
+            color: var(--text-muted);
+            cursor: pointer;
+            font-size: 14px;
+            transition: color .2s;
+        }
+        .kaza-search button:hover { color: var(--cream); }
+
+        /* Cart icon */
+        .kaza-cart-icon {
+            position: relative;
+            cursor: pointer;
+            color: var(--text-muted);
+            font-size: 18px;
+            transition: color .2s;
+        }
+        .kaza-cart-icon:hover { color: var(--cream); }
+        .kaza-cart-badge {
+            position: absolute;
+            top: -7px; right: -9px;
+            background: var(--cream);
+            color: var(--dark-bg);
+            font-size: 10px;
+            font-weight: 700;
+            width: 18px; height: 18px;
+            border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+        }
+
+        /* Ingresar button */
+        .btn-ingresar {
+            font-size: 12px;
+            font-weight: 600;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            padding: 7px 18px;
+            border-radius: 6px;
+            border: 1px solid var(--cream);
+            color: var(--cream);
+            background: transparent;
+            transition: all .2s;
+            white-space: nowrap;
+        }
+        .btn-ingresar:hover {
+            background: var(--cream);
+            color: var(--dark-bg);
+        }
+
+        /* Mobile menu toggle */
+        .kaza-hamburger {
+            display: none;
+            flex-direction: column;
+            gap: 5px;
+            cursor: pointer;
+            padding: 4px;
+        }
+        .kaza-hamburger span {
+            width: 22px; height: 2px;
+            background: var(--text-muted);
+            border-radius: 2px;
+            transition: all .3s;
+        }
+
+        /* ── CART DRAWER ──────────────────────────────────── */
+        .cart-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,.6);
+            z-index: 1100;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity .3s;
+        }
+        .cart-overlay.open { opacity: 1; pointer-events: all; }
+
+        .cart-drawer {
+            position: fixed;
+            top: 0; right: 0;
+            width: 380px; height: 100vh;
+            background: #181818;
+            border-left: 1px solid var(--glass-border);
+            z-index: 1200;
+            transform: translateX(100%);
+            transition: transform .35s cubic-bezier(.4,0,.2,1);
+            display: flex;
+            flex-direction: column;
+        }
+        .cart-drawer.open { transform: translateX(0); }
+
+        .cart-drawer-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 20px 24px;
+            border-bottom: 1px solid var(--glass-border);
+        }
+        .cart-drawer-header h4 {
+            font-size: 15px;
+            font-weight: 700;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            color: var(--cream);
+        }
+        .cart-close-btn {
+            background: transparent;
+            border: none;
+            color: var(--text-muted);
+            font-size: 20px;
+            cursor: pointer;
+            transition: color .2s;
+        }
+        .cart-close-btn:hover { color: var(--cream); }
+
+        .cart-drawer-body {
+            flex: 1;
+            overflow-y: auto;
+            padding: 16px 24px;
+        }
+        .cart-item-row {
+            display: flex;
+            gap: 14px;
+            padding: 14px 0;
+            border-bottom: 1px solid var(--glass-border);
+            align-items: flex-start;
+        }
+        .cart-item-img {
+            width: 64px; height: 64px;
+            object-fit: cover;
+            border-radius: 6px;
+            border: 1px solid var(--glass-border);
+            flex-shrink: 0;
+        }
+        .cart-item-info { flex: 1; }
+        .cart-item-name { font-size: 13px; font-weight: 600; margin-bottom: 3px; }
+        .cart-item-meta { font-size: 11px; color: var(--text-muted); margin-bottom: 5px; }
+        .cart-item-price { font-size: 13px; color: var(--cream); font-weight: 600; }
+        .cart-item-remove {
+            background: transparent;
+            border: none;
+            color: var(--text-muted);
+            cursor: pointer;
+            font-size: 13px;
+            transition: color .2s;
+            padding: 2px;
+        }
+        .cart-item-remove:hover { color: #e74c3c; }
+        .cart-empty-msg {
+            text-align: center;
+            padding: 50px 20px;
+            color: var(--text-muted);
+        }
+        .cart-empty-msg i { font-size: 40px; display: block; margin-bottom: 12px; }
+
+        .cart-drawer-footer {
+            padding: 20px 24px;
+            border-top: 1px solid var(--glass-border);
+        }
+        .cart-total-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 16px;
+            font-size: 15px;
+            font-weight: 700;
+        }
+        .cart-total-amount { color: var(--cream); }
+
+        /* ── BUTTONS ──────────────────────────────────────── */
+        .kaza-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 12px 28px;
+            font-family: 'Inter', sans-serif;
+            font-size: 13px;
+            font-weight: 600;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all .25s;
+            border: none;
+            outline: none;
+        }
+        .kaza-btn-primary {
+            background: var(--cream);
+            color: var(--dark-bg);
+        }
+        .kaza-btn-primary:hover {
+            background: var(--cream-hover);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(242,232,198,.25);
+        }
+        .kaza-btn-outline {
+            background: transparent;
+            border: 1px solid var(--cream);
+            color: var(--cream);
+        }
+        .kaza-btn-outline:hover {
+            background: var(--cream);
+            color: var(--dark-bg);
+            transform: translateY(-2px);
+        }
+        .kaza-btn-full { width: 100%; }
+
+        /* ── PRODUCT CARD ─────────────────────────────────── */
+        .product-card {
+            background: var(--dark-card);
+            border: 1px solid var(--glass-border);
+            border-radius: 10px;
+            overflow: hidden;
+            transition: transform .3s, box-shadow .3s, border-color .3s;
+            cursor: pointer;
+        }
+        .product-card:hover {
+            transform: translateY(-6px);
+            box-shadow: 0 16px 40px rgba(0,0,0,.5);
+            border-color: rgba(242,232,198,.2);
+        }
+        .product-card-img {
+            position: relative;
+            overflow: hidden;
+            aspect-ratio: 3/4;
+        }
+        .product-card-img img {
+            width: 100%; height: 100%;
+            object-fit: cover;
+            transition: transform .5s;
+        }
+        .product-card:hover .product-card-img img { transform: scale(1.06); }
+        .product-badge-pill {
+            position: absolute;
+            top: 12px; left: 12px;
+            background: var(--cream);
+            color: var(--dark-bg);
+            font-size: 10px;
+            font-weight: 700;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            padding: 3px 10px;
+            border-radius: 20px;
+        }
+        .product-card-body {
+            padding: 14px 16px 16px;
+        }
+        .product-card-catalog {
+            font-size: 10px;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            color: var(--cream);
+            margin-bottom: 5px;
+        }
+        .product-card-name {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text-main);
+            margin-bottom: 8px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .product-card-price {
+            font-size: 15px;
+            font-weight: 700;
+            color: var(--cream);
+        }
+        .product-card-footer {
+            padding: 0 16px 14px;
+        }
+
+        /* ── SECTION TITLES ───────────────────────────────── */
+        .section-title {
+            font-size: 11px;
+            letter-spacing: 4px;
+            text-transform: uppercase;
+            color: var(--cream);
+            margin-bottom: 8px;
+        }
+        .section-heading {
+            font-size: 28px;
+            font-weight: 800;
+            color: var(--text-main);
+            margin-bottom: 40px;
+        }
+        .section-heading span { color: var(--cream); }
+
+        /* ── CONTAINERS ───────────────────────────────────── */
+        .kaza-container {
+            max-width: 1240px;
+            margin: 0 auto;
+            padding: 0 24px;
+        }
+        .kaza-section { padding: 80px 0; }
+        .kaza-section-sm { padding: 50px 0; }
+
+        /* ── SEPARADOR ────────────────────────────────────── */
+        .kaza-divider {
+            border: none;
+            border-top: 1px solid var(--glass-border);
+            margin: 0;
+        }
+
+        /* ── TOAST ────────────────────────────────────────── */
+        .kaza-toast {
+            position: fixed;
+            bottom: 28px; right: 28px;
+            background: #1e1e1e;
+            border: 1px solid var(--glass-border);
+            border-left: 3px solid var(--cream);
+            color: var(--text-main);
+            font-size: 13px;
+            padding: 14px 18px;
+            border-radius: 8px;
+            z-index: 9999;
+            opacity: 0;
+            transform: translateY(16px);
+            transition: all .35s;
+            max-width: 280px;
+            box-shadow: 0 8px 30px rgba(0,0,0,.5);
+            pointer-events: none;
+        }
+        .kaza-toast.show { opacity: 1; transform: translateY(0); }
+
+        /* ── FOOTER ───────────────────────────────────────── */
+        .kaza-footer {
+            background: #0d0d0d;
+            border-top: 1px solid var(--glass-border);
+            padding: 60px 0 30px;
+        }
+        .footer-logo img { height: 36px; margin-bottom: 16px; }
+        .footer-tagline { font-size: 13px; color: var(--text-muted); line-height: 1.6; max-width: 220px; }
+        .footer-col-title {
+            font-size: 10px;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            color: var(--cream);
+            margin-bottom: 18px;
+        }
+        .footer-links { list-style: none; }
+        .footer-links li { margin-bottom: 10px; }
+        .footer-links a { font-size: 13px; color: var(--text-muted); transition: color .2s; }
+        .footer-links a:hover { color: var(--cream); }
+        .footer-social { display: flex; gap: 14px; margin-top: 6px; }
+        .footer-social a {
+            width: 34px; height: 34px;
+            border: 1px solid var(--glass-border);
+            border-radius: 6px;
+            display: flex; align-items: center; justify-content: center;
+            color: var(--text-muted);
+            font-size: 14px;
+            transition: all .2s;
+        }
+        .footer-social a:hover { border-color: var(--cream); color: var(--cream); }
+        .footer-bottom {
+            border-top: 1px solid var(--glass-border);
+            margin-top: 50px;
+            padding-top: 24px;
+            font-size: 12px;
+            color: var(--text-muted);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+        .footer-newsletter {
+            display: flex;
+            gap: 8px;
+        }
+        .footer-newsletter input {
+            background: rgba(255,255,255,.05);
+            border: 1px solid var(--glass-border);
+            color: var(--text-main);
+            padding: 8px 14px;
+            border-radius: 6px;
+            font-size: 13px;
+            outline: none;
+            width: 200px;
+            transition: border-color .2s;
+        }
+        .footer-newsletter input:focus { border-color: var(--cream); }
+        .footer-newsletter input::placeholder { color: var(--text-muted); }
+        .footer-newsletter button {
+            background: var(--cream);
+            color: var(--dark-bg);
+            border: none;
+            padding: 8px 16px;
+            border-radius: 6px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background .2s;
+        }
+        .footer-newsletter button:hover { background: var(--cream-hover); }
+
+        /* ── RESPONSIVE ───────────────────────────────────── */
+        @media (max-width: 768px) {
+            .kaza-header { padding: 0 20px; }
+            .kaza-nav { display: none; }
+            .kaza-nav.mobile-open {
+                display: flex;
+                flex-direction: column;
+                position: fixed;
+                top: 64px; left: 0; right: 0;
+                background: #111;
+                border-bottom: 1px solid var(--glass-border);
+                padding: 16px;
+                gap: 4px;
+                z-index: 999;
+            }
+            .kaza-hamburger { display: flex; }
+            .kaza-search input { width: 130px; }
+            .kaza-search input:focus { width: 150px; }
+            .cart-drawer { width: 100%; }
+        }
+
+        /* ── OWL CAROUSEL CUSTOM ──────────────────────────── */
+        .owl-theme .owl-dots .owl-dot span {
+            background: var(--glass-border);
+            transition: background .2s, width .2s;
+        }
+        .owl-theme .owl-dots .owl-dot.active span,
+        .owl-theme .owl-dots .owl-dot:hover span {
+            background: var(--cream);
+            width: 24px;
+        }
+        .owl-theme .owl-nav [class*=owl-] {
+            background: rgba(255,255,255,.06) !important;
+            border: 1px solid var(--glass-border) !important;
+            color: var(--cream) !important;
+            border-radius: 6px !important;
+            width: 36px; height: 36px;
+            display: flex; align-items: center; justify-content: center;
+            transition: all .2s;
+        }
+        .owl-theme .owl-nav [class*=owl-]:hover {
+            background: var(--cream) !important;
+            color: var(--dark-bg) !important;
+        }
+
+        /* ── ANIMATIONS ───────────────────────────────────── */
+        @keyframes fadeUp {
+            from { opacity: 0; transform: translateY(24px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+        .fade-up { animation: fadeUp .5s ease forwards; }
+
+        {% block extra_css %}{% endblock %}
+    </style>
+</head>
+<body>
+
+<!-- ─── HEADER ──────────────────────────────────────── -->
+<header class="kaza-header" id="kaza-header">
+    <!-- Logo -->
+    <a href="{% url 'public_home' %}" class="kaza-logo">
+        <img src="{% static 'essence/img/Kaza-Logo.png' %}" alt="Kaza">
+    </a>
+
+    <!-- Nav -->
+    <nav class="kaza-nav" id="kaza-nav">
+        <a href="{% url 'public_home' %}" class="{% if request.path == '/' %}active{% endif %}">Inicio</a>
+        <a href="{% url 'public_shop' %}" class="{% if '/tienda' in request.path %}active{% endif %}">Tienda</a>
+        {% if catalogs %}{% for c in catalogs|slice:":3" %}<a href="{% url 'public_shop' %}?catalog={{ c.id }}">{{ c.name }}</a>{% endfor %}{% endif %}
+        <a href="{% url 'public_checkout' %}" class="{% if '/pedido' in request.path %}active{% endif %}">Pedido</a>
+    </nav>
+
+    <!-- Actions -->
+    <div class="kaza-header-actions">
+        <form class="kaza-search" action="{% url 'public_shop' %}" method="get">
+            <input type="search" name="q" placeholder="Buscar..." value="{{ request.GET.q|default:'' }}">
+            <button type="submit"><i class="fa fa-search"></i></button>
+        </form>
+
+        <div class="kaza-cart-icon" id="cart-toggle-btn">
+            <i class="fa fa-shopping-bag"></i>
+            <span class="kaza-cart-badge" id="cart-count">{{ cart_count|default:0 }}</span>
+        </div>
+
+        <a href="{% url 'login' %}" class="btn-ingresar">Ingresar</a>
+
+        <div class="kaza-hamburger" id="hamburger-btn">
+            <span></span><span></span><span></span>
+        </div>
+    </div>
+</header>
+
+<!-- ─── CART DRAWER ──────────────────────────────────── -->
+<div class="cart-overlay" id="cart-overlay"></div>
+<div class="cart-drawer" id="cart-drawer">
+    <div class="cart-drawer-header">
+        <h4>Mi Carrito</h4>
+        <button class="cart-close-btn" id="cart-close-btn">
+            <i class="fa fa-times"></i>
+        </button>
+    </div>
+
+    <div class="cart-drawer-body" id="cart-drawer-body">
+        {% if cart_items %}
+            {% for key, item in cart_items.items %}
+            <div class="cart-item-row" id="cart-row-{{ key }}">
+                {% if item.image %}
+                <img src="{{ item.image }}" class="cart-item-img" alt="{{ item.name }}">
+                {% else %}
+                <img src="{% static 'essence/img/camisetas/cam1.jpg' %}" class="cart-item-img" alt="{{ item.name }}">
+                {% endif %}
+                <div class="cart-item-info">
+                    <div class="cart-item-name">{{ item.name }}</div>
+                    <div class="cart-item-meta">
+                        {% if item.size %}Talla: {{ item.size }} &middot; {% endif %}Cant: {{ item.quantity }}
+                    </div>
+                    <div class="cart-item-price">${{ item.price }}</div>
+                </div>
+                <button class="cart-item-remove" onclick="removeFromCart('{{ key }}')">
+                    <i class="fa fa-trash-o"></i>
+                </button>
+            </div>
+            {% endfor %}
+        {% else %}
+        <div class="cart-empty-msg" id="cart-empty">
+            <i class="fa fa-shopping-bag"></i>
+            <p>Tu carrito está vacío</p>
+        </div>
+        {% endif %}
+    </div>
+
+    <div class="cart-drawer-footer">
+        <div class="cart-total-row">
+            <span>Total</span>
+            <span class="cart-total-amount" id="cart-total">${{ cart_total|default:"0.00" }}</span>
+        </div>
+        <a href="{% url 'public_checkout' %}" class="kaza-btn kaza-btn-primary kaza-btn-full">
+            Confirmar Pedido
+        </a>
+    </div>
+</div>
+
+<!-- ─── TOAST ────────────────────────────────────────── -->
+<div class="kaza-toast" id="kaza-toast"></div>
+
+<!-- ─── SPACER (fixed header) ───────────────────────── -->
+<div style="height:64px;"></div>
+
+<!-- ─── MAIN CONTENT ─────────────────────────────────── -->
+{% block content %}{% endblock %}
+
+<!-- ─── FOOTER ───────────────────────────────────────── -->
+<footer class="kaza-footer">
+    <div class="kaza-container">
+        <div style="display:grid; grid-template-columns:1.4fr 1fr 1fr 1.4fr; gap:40px; flex-wrap:wrap;">
+            <div>
+                <div class="footer-logo">
+                    <img src="{% static 'essence/img/Kaza-Logo.png' %}" alt="Kaza">
+                </div>
+                <p class="footer-tagline">Moda que te define. Calidad que se siente.</p>
+                <div class="footer-social" style="margin-top:20px;">
+                    <a href="#"><i class="fa fa-instagram"></i></a>
+                    <a href="#"><i class="fa fa-facebook"></i></a>
+                    <a href="#"><i class="fa fa-whatsapp"></i></a>
+                </div>
+            </div>
+            <div>
+                <div class="footer-col-title">Tienda</div>
+                <ul class="footer-links">
+                    <li><a href="{% url 'public_shop' %}">Todos los productos</a></li>
+                    {% for c in catalogs|slice:":4" %}
+                    <li><a href="{% url 'public_shop' %}?catalog={{ c.id }}">{{ c.name }}</a></li>
+                    {% endfor %}
+                </ul>
+            </div>
+            <div>
+                <div class="footer-col-title">Ayuda</div>
+                <ul class="footer-links">
+                    <li><a href="#">Estado del Pedido</a></li>
+                    <li><a href="#">Envíos y Entregas</a></li>
+                    <li><a href="#">Política de Privacidad</a></li>
+                    <li><a href="#">Términos de Uso</a></li>
+                </ul>
+            </div>
+            <div>
+                <div class="footer-col-title">Newsletter</div>
+                <p style="font-size:13px; color:var(--text-muted); margin-bottom:14px;">Recibe las últimas novedades.</p>
+                <div class="footer-newsletter">
+                    <input type="email" placeholder="Tu correo">
+                    <button type="button">OK</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="footer-bottom">
+            <span>&copy; <script>document.write(new Date().getFullYear())</script> Kaza. Todos los derechos reservados.</span>
+            <a href="{% url 'login' %}" style="color:var(--text-muted); font-size:11px; letter-spacing:1px;">Panel Admin</a>
+        </div>
+    </div>
+</footer>
+
+<!-- ─── SCRIPTS ───────────────────────────────────────── -->
+<script src="{% static 'essence/js/jquery/jquery-2.2.4.min.js' %}"></script>
+<script src="{% static 'essence/js/plugins.js' %}"></script>
+
+<script>
+// ── Header scroll effect ──
+window.addEventListener('scroll', function() {
+    document.getElementById('kaza-header').classList.toggle('scrolled', window.scrollY > 20);
+});
+
+// ── Hamburger ──
+document.getElementById('hamburger-btn').addEventListener('click', function() {
+    document.getElementById('kaza-nav').classList.toggle('mobile-open');
+});
+
+// ── Cart drawer ──
+function openCart() {
+    document.getElementById('cart-drawer').classList.add('open');
+    document.getElementById('cart-overlay').classList.add('open');
+    document.body.style.overflow = 'hidden';
+}
+function closeCart() {
+    document.getElementById('cart-drawer').classList.remove('open');
+    document.getElementById('cart-overlay').classList.remove('open');
+    document.body.style.overflow = '';
+}
+document.getElementById('cart-toggle-btn').addEventListener('click', openCart);
+document.getElementById('cart-close-btn').addEventListener('click', closeCart);
+document.getElementById('cart-overlay').addEventListener('click', closeCart);
+
+// ── Toast ──
+function showToast(msg) {
+    var t = document.getElementById('kaza-toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    setTimeout(function() { t.classList.remove('show'); }, 3000);
+}
+
+// ── Cart HTML helper ──
+function buildCartItem(key, item) {
+    var img = item.image
+        ? '<img src="' + item.image + '" class="cart-item-img" alt="">'
+        : '<img src="{% static "essence/img/camisetas/cam1.jpg" %}" class="cart-item-img" alt="">';
+    var meta = (item.size ? 'Talla: ' + item.size + ' &middot; ' : '') + 'Cant: ' + item.quantity;
+    return '<div class="cart-item-row" id="cart-row-' + key + '">'
+        + img
+        + '<div class="cart-item-info">'
+        +   '<div class="cart-item-name">' + item.name + '</div>'
+        +   '<div class="cart-item-meta">' + meta + '</div>'
+        +   '<div class="cart-item-price">$' + item.price + '</div>'
+        + '</div>'
+        + '<button class="cart-item-remove" onclick="removeFromCart(\'' + key + '\')">'
+        +   '<i class="fa fa-trash-o"></i>'
+        + '</button>'
+        + '</div>';
+}
+
+// ── Remove from cart ──
+function removeFromCart(key) {
+    fetch('/cart/remove/' + key + '/', {
+        method: 'POST',
+        headers: { 'X-CSRFToken': '{{ csrf_token }}' }
+    })
+    .then(r => r.json())
+    .then(function(data) {
+        if (data.success) {
+            var row = document.getElementById('cart-row-' + key);
+            if (row) row.remove();
+            updateCartCount(data.cart_count, data.cart_total);
+            if (data.cart_count === 0) {
+                document.getElementById('cart-drawer-body').innerHTML =
+                    '<div class="cart-empty-msg" id="cart-empty"><i class="fa fa-shopping-bag"></i><p>Tu carrito está vacío</p></div>';
+            }
+            showToast('Producto eliminado');
+        }
+    });
+}
+
+// ── Add to cart ──
+function addToCart(productId, size, quantity) {
+    fetch('/cart/add/', {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': '{{ csrf_token }}',
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ product_id: productId, size: size || '', quantity: quantity || 1 })
+    })
+    .then(r => r.json())
+    .then(function(data) {
+        if (data.success) {
+            updateCartCount(data.cart_count, data.cart_total);
+            showToast('¡Agregado al carrito!');
+            // Refresh cart drawer items
+            fetch('/cart/')
+                .then(r => r.json())
+                .then(function(cartData) {
+                    var body = document.getElementById('cart-drawer-body');
+                    var html = '';
+                    var items = cartData.cart_items;
+                    if (Object.keys(items).length === 0) {
+                        html = '<div class="cart-empty-msg"><i class="fa fa-shopping-bag"></i><p>Tu carrito está vacío</p></div>';
+                    } else {
+                        for (var k in items) { html += buildCartItem(k, items[k]); }
+                    }
+                    body.innerHTML = html;
+                });
+            setTimeout(openCart, 400);
+        } else {
+            showToast(data.error || 'Error al agregar');
+        }
+    });
+}
+
+function updateCartCount(count, total) {
+    document.getElementById('cart-count').textContent = count;
+    var t = document.getElementById('cart-total');
+    if (t) t.textContent = '$' + total;
+}
+</script>
+
+{% block extra_js %}{% endblock %}
+</body>
+</html>

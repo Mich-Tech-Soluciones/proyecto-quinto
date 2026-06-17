@@ -1,0 +1,271 @@
+{% extends 'public/base_public.html' %}
+{% load static %}
+
+{% block title %}Mi Pedido | Kaza{% endblock %}
+
+{% block extra_css %}
+<style>
+    .checkout-section { padding: 50px 0 80px; }
+    .checkout-page-title {
+        font-size: 28px; font-weight: 800; color: var(--text-main);
+        margin-bottom: 6px;
+    }
+    .checkout-page-title span { color: var(--cream); }
+    .checkout-sub { font-size: 13px; color: var(--text-muted); margin-bottom: 40px; }
+
+    .checkout-card {
+        background: var(--dark-card);
+        border: 1px solid var(--glass-border);
+        border-radius: 12px;
+        padding: 32px;
+        margin-bottom: 20px;
+    }
+    .checkout-card-title {
+        font-size: 10px;
+        letter-spacing: 3px;
+        text-transform: uppercase;
+        color: var(--cream);
+        margin-bottom: 24px;
+        padding-bottom: 14px;
+        border-bottom: 1px solid var(--glass-border);
+    }
+    .kaza-form-label {
+        font-size: 11px;
+        letter-spacing: 1px;
+        color: var(--text-muted);
+        display: block;
+        margin-bottom: 7px;
+    }
+    .kaza-form-input {
+        width: 100%;
+        background: rgba(255,255,255,.04);
+        border: 1px solid var(--glass-border);
+        color: var(--text-main);
+        padding: 10px 14px;
+        border-radius: 7px;
+        font-size: 14px;
+        font-family: 'Inter', sans-serif;
+        outline: none;
+        transition: border-color .2s;
+        margin-bottom: 18px;
+    }
+    .kaza-form-input:focus { border-color: var(--cream); }
+    .kaza-form-input::placeholder { color: var(--text-muted); }
+    textarea.kaza-form-input { resize: vertical; min-height: 90px; }
+
+    /* Payment options */
+    .payment-option {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        padding: 14px 16px;
+        border: 1px solid var(--glass-border);
+        border-radius: 8px;
+        cursor: pointer;
+        margin-bottom: 10px;
+        transition: all .2s;
+        background: rgba(255,255,255,.02);
+    }
+    .payment-option:hover { border-color: rgba(242,232,198,.3); }
+    .payment-option.selected {
+        border-color: var(--cream);
+        background: rgba(242,232,198,.06);
+    }
+    .payment-option input[type=radio] { display: none; }
+    .payment-option i { font-size: 18px; color: var(--cream); width: 22px; text-align: center; }
+    .payment-option span { font-size: 13px; color: var(--text-main); }
+
+    /* Order summary */
+    .order-item-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        padding: 12px 0;
+        border-bottom: 1px solid var(--glass-border);
+        font-size: 13px;
+    }
+    .order-item-row:last-child { border-bottom: none; }
+    .order-item-name { color: var(--text-main); font-weight: 500; }
+    .order-item-meta { font-size: 11px; color: var(--text-muted); margin-top: 3px; }
+    .order-item-price { color: var(--cream); font-weight: 700; white-space: nowrap; }
+    .order-total-row {
+        display: flex;
+        justify-content: space-between;
+        padding: 16px 0 0;
+        font-size: 17px;
+        font-weight: 800;
+        color: var(--text-main);
+        border-top: 1px solid var(--cream);
+        margin-top: 4px;
+    }
+    .order-total-row .amount { color: var(--cream); }
+
+    /* Empty cart */
+    .empty-cart-state {
+        text-align: center;
+        padding: 70px 20px;
+    }
+    .empty-cart-state i { font-size: 50px; color: var(--text-muted); display: block; margin-bottom: 18px; opacity: .4; }
+    .empty-cart-state h3 { font-size: 20px; font-weight: 700; margin-bottom: 8px; }
+    .empty-cart-state p { font-size: 14px; color: var(--text-muted); margin-bottom: 24px; }
+
+    /* Note box */
+    .info-note {
+        background: rgba(242,232,198,.05);
+        border: 1px solid rgba(242,232,198,.15);
+        border-left: 3px solid var(--cream);
+        border-radius: 6px;
+        padding: 13px 16px;
+        font-size: 12px;
+        color: var(--text-muted);
+        line-height: 1.6;
+        margin-top: 20px;
+    }
+
+    .form-row-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 0 16px; }
+    @media (max-width: 600px) { .form-row-2 { grid-template-columns: 1fr; } }
+</style>
+{% endblock %}
+
+{% block content %}
+
+<section class="checkout-section">
+    <div class="kaza-container">
+
+        <h1 class="checkout-page-title">Mi <span>Pedido</span></h1>
+        <p class="checkout-sub">Completa tus datos y confirma el pedido.</p>
+
+        {% if not cart_items %}
+        <!-- EMPTY -->
+        <div class="checkout-card">
+            <div class="empty-cart-state">
+                <i class="fa fa-shopping-bag"></i>
+                <h3>Tu carrito está vacío</h3>
+                <p>Agrega productos desde la tienda para hacer tu pedido.</p>
+                <a href="{% url 'public_shop' %}" class="kaza-btn kaza-btn-primary">Ir a la Tienda</a>
+            </div>
+        </div>
+
+        {% else %}
+        <div style="display:grid; grid-template-columns:1fr 400px; gap:28px; align-items:start;">
+
+            <!-- LEFT: FORM -->
+            <div>
+                <form method="post" id="checkout-form">
+                    {% csrf_token %}
+
+                    <!-- Customer data -->
+                    <div class="checkout-card">
+                        <div class="checkout-card-title">Datos del Cliente</div>
+
+                        <label class="kaza-form-label">Nombre Completo *</label>
+                        <input type="text" name="customer_name" class="kaza-form-input"
+                               placeholder="Tu nombre completo" required
+                               value="{{ form_data.customer_name|default:'' }}">
+
+                        <div class="form-row-2">
+                            <div>
+                                <label class="kaza-form-label">Correo Electrónico</label>
+                                <input type="email" name="customer_email" class="kaza-form-input"
+                                       placeholder="correo@ejemplo.com"
+                                       value="{{ form_data.customer_email|default:'' }}">
+                            </div>
+                            <div>
+                                <label class="kaza-form-label">Teléfono / WhatsApp *</label>
+                                <input type="tel" name="customer_phone" class="kaza-form-input"
+                                       placeholder="312 345 6789" required
+                                       value="{{ form_data.customer_phone|default:'' }}">
+                            </div>
+                        </div>
+
+                        <label class="kaza-form-label">Empresa (Opcional)</label>
+                        <input type="text" name="company" class="kaza-form-input"
+                               placeholder="Nombre de empresa"
+                               value="{{ form_data.company|default:'' }}">
+
+                        <label class="kaza-form-label">Dirección / Notas del Pedido</label>
+                        <textarea name="notes" class="kaza-form-input"
+                                  placeholder="Dirección de entrega, referencias, notas adicionales...">{{ form_data.notes|default:'' }}</textarea>
+                    </div>
+
+                    <!-- Payment -->
+                    <div class="checkout-card">
+                        <div class="checkout-card-title">Método de Pago</div>
+
+                        <label class="payment-option selected" id="pay-efectivo">
+                            <input type="radio" name="payment_method" value="Efectivo" checked>
+                            <i class="fa fa-money"></i>
+                            <span>Efectivo</span>
+                        </label>
+                        <label class="payment-option" id="pay-transferencia">
+                            <input type="radio" name="payment_method" value="Transferencia">
+                            <i class="fa fa-university"></i>
+                            <span>Transferencia Bancaria</span>
+                        </label>
+                        <label class="payment-option" id="pay-nequi">
+                            <input type="radio" name="payment_method" value="Nequi">
+                            <i class="fa fa-mobile"></i>
+                            <span>Nequi / Daviplata</span>
+                        </label>
+                    </div>
+
+                    <!-- Submit -->
+                    <button type="submit" class="kaza-btn kaza-btn-primary kaza-btn-full" style="font-size:14px;">
+                        <i class="fa fa-check"></i> &nbsp; Confirmar Pedido
+                    </button>
+                </form>
+            </div>
+
+            <!-- RIGHT: SUMMARY -->
+            <div>
+                <div class="checkout-card" style="position:sticky; top:80px;">
+                    <div class="checkout-card-title">Resumen</div>
+
+                    {% for key, item in cart_items.items %}
+                    <div class="order-item-row">
+                        <div>
+                            <div class="order-item-name">{{ item.name }}</div>
+                            <div class="order-item-meta">
+                                {% if item.size %}Talla: {{ item.size }} &middot; {% endif %}Cant: {{ item.quantity }}
+                            </div>
+                        </div>
+                        <div class="order-item-price">${{ item.subtotal|floatformat:2 }}</div>
+                    </div>
+                    {% endfor %}
+
+                    <div class="order-total-row">
+                        <span>Total</span>
+                        <span class="amount">${{ cart_total|floatformat:2 }}</span>
+                    </div>
+
+                    <div class="info-note">
+                        <i class="fa fa-info-circle" style="color:var(--cream);"></i>
+                        Al confirmar tu pedido, un asesor de Kaza se contactará contigo para coordinar pago y entrega.
+                    </div>
+
+                    <div style="text-align:center; margin-top:18px;">
+                        <a href="{% url 'public_shop' %}" style="font-size:12px; color:var(--text-muted);">
+                            <i class="fa fa-arrow-left"></i> &nbsp;Seguir comprando
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+    </div>
+</section>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.querySelectorAll('.payment-option').forEach(function(opt) {
+    opt.addEventListener('click', function() {
+        document.querySelectorAll('.payment-option').forEach(o => o.classList.remove('selected'));
+        opt.classList.add('selected');
+        opt.querySelector('input[type=radio]').checked = true;
+    });
+});
+</script>
+{% endblock %}
