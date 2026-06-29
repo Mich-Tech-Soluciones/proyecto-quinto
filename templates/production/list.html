@@ -52,7 +52,14 @@
                         <tr>
                             <td><span class="text-white-50">#{{ sheet.id }}</span></td>
                             <td><span class="badge bg-dark border border-secondary">Pedido #{{ sheet.order.id }}</span></td>
-                            <td>{{ sheet.order.customer_name }}</td>
+                            <td>
+                                <strong class="text-white">{{ sheet.order.customer_name }}</strong>
+                                {% if sheet.order.company %}
+                                    <span class="text-white-50 small">({{ sheet.order.company }})</span>
+                                {% endif %}
+                                <br>
+                                <small class="text-white-50">Total: ${{ sheet.order.total }} | Pago: {{ sheet.order.payment_status }}</small>
+                            </td>
                             <td>
                                 {% if sheet.status == 'Pendiente' %}
                                     <span class="badge bg-secondary">Pendiente</span>
@@ -110,6 +117,21 @@
                 <form method="POST" action="{% url 'production_edit' sheet.id %}">
                     {% csrf_token %}
                     <div class="modal-body">
+                        <div class="card bg-black border-secondary mb-3">
+                            <div class="card-body p-3">
+                                <h6 class="fw-bold text-white small mb-2"><i class="bi bi-cart3"></i> Información de Venta</h6>
+                                <div class="row text-white-50 small g-2">
+                                    <div class="col-6"><strong>Cliente:</strong> {{ sheet.order.customer_name }}</div>
+                                    <div class="col-6"><strong>Contacto:</strong> {{ sheet.order.customer_phone|default:"-" }}</div>
+                                    <div class="col-6"><strong>Total Venta:</strong> ${{ sheet.order.total }}</div>
+                                    <div class="col-6"><strong>Método:</strong> {{ sheet.order.payment_method }}</div>
+                                    <div class="col-12"><strong>Estado Pago:</strong> <span class="badge bg-dark border border-secondary">{{ sheet.order.payment_status }}</span></div>
+                                    {% if sheet.order.notes %}
+                                    <div class="col-12 text-wrap"><strong>Notas Pedido:</strong> <span class="fst-italic">"{{ sheet.order.notes }}"</span></div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
                         <div class="mb-3">
                             <label class="form-label small text-white-50">Estado de Producción</label>
                             <select name="status" class="form-select bg-dark text-white border-secondary">
