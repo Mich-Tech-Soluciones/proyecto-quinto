@@ -1,4 +1,4 @@
-from django.shortcuts import render, get_object_or_404
+from django.shortcuts import render, redirect, get_object_or_404
 from django.views import View
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from sales.models import Order
@@ -22,8 +22,31 @@ class ManageProductionView(LoginRequiredMixin, UserPassesTestMixin, View):
     def post(self, request):
         order_id = request.POST.get('order_id')
         order = get_object_or_404(Order, id=order_id)
-        ProductionSheet.objects.create(order=order)
-        return render(request, 'production/list.html', {'sheets': ProductionSheet.objects.all()})
+        ProductionSheet.objects.get_or_create(order=order)
+        return redirect('production_manage')
+
+class EditProductionView(LoginRequiredMixin, UserPassesTestMixin, View):
+    def test_func(self):
+        return self.request.user.is_superuser or self.request.user.role in ['ADMIN', 'CUT', 'PRODUCTION', 'PACKAGING']
+
+    def post(self, request, sheet_id):
+        sheet = get_object_or_404(ProductionSheet, id=sheet_id)
+        sheet.status = request.POST.get('status', sheet.status)
+        sheet.designed_by = request.POST.get('designed_by') or None
+        sheet.produced_by = request.POST.get('produced_by') or None
+        sheet.qc_by = request.POST.get('qc_by') or None
+        sheet.save()
+        return redirect('production_manage')
+
+class DeleteProductionView(LoginRequiredMixin, UserPassesTestMixin, View):
+    def test_func(self):
+        return self.request.user.is_superuser or self.request.user.role in ['ADMIN', 'CUT', 'PRODUCTION', 'PACKAGING']
+
+    def post(self, request, sheet_id):
+        sheet = get_object_or_404(ProductionSheet, id=sheet_id)
+        if sheet.status == 'Completado':
+            sheet.delete()
+        return redirect('production_manage')
 
 class PrintProductionSheetView(LoginRequiredMixin, UserPassesTestMixin, View):
     def test_func(self):

@@ -54,18 +54,34 @@
                             <td><span class="badge bg-dark border border-secondary">Pedido #{{ sheet.order.id }}</span></td>
                             <td>{{ sheet.order.customer_name }}</td>
                             <td>
-                                <select class="form-select form-select-sm bg-dark text-white border-secondary" style="width: 130px;">
-                                    <option {% if sheet.status == 'Pendiente' %}selected{% endif %}>Pendiente</option>
-                                    <option {% if sheet.status == 'En Corte' %}selected{% endif %}>En Corte</option>
-                                    <option {% if sheet.status == 'En Costura' %}selected{% endif %}>En Costura</option>
-                                    <option {% if sheet.status == 'Control Calidad' %}selected{% endif %}>Control Calidad</option>
-                                    <option {% if sheet.status == 'Completado' %}selected{% endif %}>Completado</option>
-                                </select>
+                                {% if sheet.status == 'Pendiente' %}
+                                    <span class="badge bg-secondary">Pendiente</span>
+                                {% elif sheet.status == 'En Corte' %}
+                                    <span class="badge bg-info text-dark">En Corte</span>
+                                {% elif sheet.status == 'En Costura' %}
+                                    <span class="badge bg-warning text-dark">En Costura</span>
+                                {% elif sheet.status == 'Control Calidad' %}
+                                    <span class="badge bg-primary">Control Calidad</span>
+                                {% elif sheet.status == 'Completado' %}
+                                    <span class="badge bg-success">Completado</span>
+                                {% else %}
+                                    <span class="badge bg-dark border border-secondary">{{ sheet.status }}</span>
+                                {% endif %}
                             </td>
                             <td class="text-end">
-                                <a href="{% url 'production_print' sheet.id %}" target="_blank" class="btn btn-sm btn-outline-light" title="Imprimir Hoja A4">
-                                    <i class="bi bi-printer"></i> Imprimir
-                                </a>
+                                <div class="d-flex justify-content-end gap-2">
+                                    <button type="button" class="btn btn-sm btn-outline-info" data-bs-toggle="modal" data-bs-target="#editModal-{{ sheet.id }}" title="Editar Hoja">
+                                        <i class="bi bi-pencil"></i> Editar
+                                    </button>
+                                    <a href="{% url 'production_print' sheet.id %}" target="_blank" class="btn btn-sm btn-outline-light" title="Imprimir Hoja A4">
+                                        <i class="bi bi-printer"></i> Imprimir
+                                    </a>
+                                    {% if sheet.status == 'Completado' %}
+                                    <button type="button" class="btn btn-sm btn-outline-danger" data-bs-toggle="modal" data-bs-target="#deleteModal-{{ sheet.id }}" title="Eliminar Hoja">
+                                        <i class="bi bi-trash"></i> Eliminar
+                                    </button>
+                                    {% endif %}
+                                </div>
                             </td>
                         </tr>
                         {% empty %}
@@ -77,4 +93,83 @@
         </div>
     </div>
 </div>
+{% endblock %}
+
+{% block modals %}
+    {% for sheet in sheets %}
+    <!-- Modal de Edición -->
+    <div class="modal fade" id="editModal-{{ sheet.id }}" tabindex="-1" aria-labelledby="editModalLabel-{{ sheet.id }}" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content bg-dark border border-secondary text-white">
+                <div class="modal-header border-secondary">
+                    <h5 class="modal-title fw-bold" id="editModalLabel-{{ sheet.id }}">
+                        <i class="bi bi-pencil-square text-atrium me-2"></i> Editar Hoja de Producción #{{ sheet.id }}
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <form method="POST" action="{% url 'production_edit' sheet.id %}">
+                    {% csrf_token %}
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <label class="form-label small text-white-50">Estado de Producción</label>
+                            <select name="status" class="form-select bg-dark text-white border-secondary">
+                                <option value="Pendiente" {% if sheet.status == 'Pendiente' %}selected{% endif %}>Pendiente</option>
+                                <option value="En Corte" {% if sheet.status == 'En Corte' %}selected{% endif %}>En Corte</option>
+                                <option value="En Costura" {% if sheet.status == 'En Costura' %}selected{% endif %}>En Costura</option>
+                                <option value="Control Calidad" {% if sheet.status == 'Control Calidad' %}selected{% endif %}>Control Calidad</option>
+                                <option value="Completado" {% if sheet.status == 'Completado' %}selected{% endif %}>Completado</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label small text-white-50">Diseñado por</label>
+                            <input type="text" name="designed_by" class="form-control bg-dark text-white border-secondary" 
+                                   value="{{ sheet.designed_by|default_if_none:'' }}" placeholder="Nombre del diseñador">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label small text-white-50">Producido por</label>
+                            <input type="text" name="produced_by" class="form-control bg-dark text-white border-secondary" 
+                                   value="{{ sheet.produced_by|default_if_none:'' }}" placeholder="Nombre del productor">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label small text-white-50">Control de Calidad por</label>
+                            <input type="text" name="qc_by" class="form-control bg-dark text-white border-secondary" 
+                                   value="{{ sheet.qc_by|default_if_none:'' }}" placeholder="Responsable de control de calidad">
+                        </div>
+                    </div>
+                    <div class="modal-footer border-secondary">
+                        <button type="button" class="btn btn-sm btn-outline-light" data-bs-dismiss="modal">Cancelar</button>
+                        <button type="submit" class="btn btn-sm btn-atrium">Guardar Cambios</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    {% if sheet.status == 'Completado' %}
+    <!-- Modal de Eliminación -->
+    <div class="modal fade" id="deleteModal-{{ sheet.id }}" tabindex="-1" aria-labelledby="deleteModalLabel-{{ sheet.id }}" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content bg-dark border border-secondary text-white">
+                <div class="modal-header border-secondary">
+                    <h5 class="modal-title fw-bold text-danger" id="deleteModalLabel-{{ sheet.id }}">
+                        <i class="bi bi-exclamation-triangle-fill me-2"></i> Confirmar Eliminación
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p>¿Estás seguro de que deseas eliminar la Hoja de Producción #{{ sheet.id }}?</p>
+                    <p class="text-warning small mb-0"><i class="bi bi-info-circle"></i> Esta acción eliminará permanentemente la hoja de producción del pedido #{{ sheet.order.id }}.</p>
+                </div>
+                <div class="modal-footer border-secondary">
+                    <form method="POST" action="{% url 'production_delete' sheet.id %}">
+                        {% csrf_token %}
+                        <button type="button" class="btn btn-sm btn-outline-light" data-bs-dismiss="modal">Cancelar</button>
+                        <button type="submit" class="btn btn-sm btn-danger">Eliminar</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+    {% endfor %}
 {% endblock %}
