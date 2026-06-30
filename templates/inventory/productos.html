@@ -145,12 +145,24 @@
                                        style="width: 80px; transition: 0.3s; border-radius: 8px;">
                             </td>
                             <td class="text-end">
-                                <div class="btn-group">
-                                    <a href="?edit={{ p.id }}" class="btn btn-sm btn-outline-warning" title="Editar">
-                                        <i class="bi bi-pencil-fill"></i>
-                                    </a>
-                                </div>
-                            </td>
+                             <div class="btn-group">
+
+                               <a href="?edit={{ p.id }}" class="btn btn-sm btn-outline-warning" title="Editar">
+                                  <i class="bi bi-pencil-fill"></i>
+                               </a>
+
+                               <form method="POST" style="display:inline;" onsubmit="return confirm('¿Deseas eliminar este producto?');">
+                                 {% csrf_token %}
+                                 <input type="hidden" name="action" value="delete">
+                                 <input type="hidden" name="id" value="{{ p.id }}">
+
+                                 <button type="submit" class="btn btn-sm btn-outline-danger" title="Eliminar">
+                                     <i class="bi bi-trash-fill"></i>
+                                 </button>
+                                 </form>
+
+                        </div>
+                    </td>
                         </tr>
                         {% empty %}
                         <tr><td colspan="6" class="text-center text-muted py-5">No hay productos en esta selección.</td></tr>
