@@ -5,7 +5,7 @@ from django.db import transaction
 import json
 from inventory.models import Product, Catalog, Category, Kardex
 from .models import Order, OrderDetail, Payment
-
+# Vista principal
 class ManageSalesView(LoginRequiredMixin, UserPassesTestMixin, View):
     def test_func(self):
         return self.request.user.is_superuser or self.request.user.role in ['ADMIN', 'DESIGN']
