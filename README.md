@@ -87,6 +87,11 @@ python manage.py runserver 8000
 ```
 
 ---
+
+## Licencia
+
+Proyecto académico.
+
 ## Instalación
 
 pip install -r requirements.txt
