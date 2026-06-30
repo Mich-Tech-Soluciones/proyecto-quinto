@@ -87,5 +87,13 @@ python manage.py runserver 8000
 ```
 
 ---
+## Integrantes
 
+Sofia Chamorro
+Alvaro Chogllo
+Abigail Topanata
+Camila Tuso
+Edson Venegas
+
+Proyecto desarrollado con Django y PostgreSQL para la gestión de Kaza Stylus.
 *Kaza Stylus — Moda & Estilo © 2025*
