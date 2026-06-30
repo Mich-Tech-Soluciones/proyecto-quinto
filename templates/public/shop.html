@@ -9,18 +9,23 @@
         padding: 50px 0 40px;
         border-bottom: 1px solid var(--glass-border);
     }
+
     .shop-hero h1 {
         font-size: 36px;
         font-weight: 800;
         color: var(--text-main);
     }
-    .shop-hero h1 span { color: var(--cream); }
+
+    .shop-hero h1 span {
+        color: var(--cream);
+    }
 
     /* Sidebar */
     .shop-sidebar {
         position: sticky;
         top: 80px;
     }
+
     .sidebar-widget {
         background: var(--dark-card);
         border: 1px solid var(--glass-border);
@@ -28,6 +33,7 @@
         padding: 22px;
         margin-bottom: 16px;
     }
+
     .sidebar-widget-title {
         font-size: 10px;
         letter-spacing: 3px;
@@ -35,9 +41,10 @@
         color: var(--cream);
         margin-bottom: 16px;
     }
+
     .sidebar-search-input {
         width: 100%;
-        background: rgba(255,255,255,.05);
+        background: rgba(255, 255, 255, .05);
         border: 1px solid var(--glass-border);
         color: var(--text-main);
         padding: 9px 12px;
@@ -46,8 +53,15 @@
         outline: none;
         transition: border-color .2s;
     }
-    .sidebar-search-input:focus { border-color: var(--cream); }
-    .sidebar-search-input::placeholder { color: var(--text-muted); }
+
+    .sidebar-search-input:focus {
+        border-color: var(--cream);
+    }
+
+    .sidebar-search-input::placeholder {
+        color: var(--text-muted);
+    }
+
     .sidebar-link-item {
         display: flex;
         align-items: center;
@@ -59,14 +73,27 @@
         transition: color .2s;
         cursor: pointer;
     }
-    .sidebar-link-item:last-child { border-bottom: none; }
-    .sidebar-link-item:hover, .sidebar-link-item.active { color: var(--cream); }
-    .sidebar-link-item i { font-size: 11px; opacity: .5; }
+
+    .sidebar-link-item:last-child {
+        border-bottom: none;
+    }
+
+    .sidebar-link-item:hover,
+    .sidebar-link-item.active {
+        color: var(--cream);
+    }
+
+    .sidebar-link-item i {
+        font-size: 11px;
+        opacity: .5;
+    }
+
     .size-grid {
         display: flex;
         flex-wrap: wrap;
         gap: 8px;
     }
+
     .size-chip {
         padding: 5px 12px;
         border: 1px solid var(--glass-border);
@@ -76,10 +103,12 @@
         transition: all .2s;
         cursor: pointer;
     }
-    .size-chip:hover, .size-chip.active {
+
+    .size-chip:hover,
+    .size-chip.active {
         border-color: var(--cream);
         color: var(--cream);
-        background: rgba(242,232,198,.07);
+        background: rgba(242, 232, 198, .07);
     }
 
     /* Topbar */
@@ -91,8 +120,16 @@
         flex-wrap: wrap;
         gap: 12px;
     }
-    .shop-results { font-size: 13px; color: var(--text-muted); }
-    .shop-results strong { color: var(--text-main); }
+
+    .shop-results {
+        font-size: 13px;
+        color: var(--text-muted);
+    }
+
+    .shop-results strong {
+        color: var(--text-main);
+    }
+
     .shop-sort {
         background: var(--dark-card);
         border: 1px solid var(--glass-border);
@@ -103,7 +140,10 @@
         outline: none;
         cursor: pointer;
     }
-    .shop-sort option { background: #1a1a1a; }
+
+    .shop-sort option {
+        background: #1a1a1a;
+    }
 
     /* Products grid */
     .products-grid {
@@ -111,8 +151,18 @@
         grid-template-columns: repeat(3, 1fr);
         gap: 20px;
     }
-    @media (max-width: 900px) { .products-grid { grid-template-columns: repeat(2, 1fr); } }
-    @media (max-width: 560px) { .products-grid { grid-template-columns: 1fr; } }
+
+    @media (max-width: 900px) {
+        .products-grid {
+            grid-template-columns: repeat(2, 1fr);
+        }
+    }
+
+    @media (max-width: 560px) {
+        .products-grid {
+            grid-template-columns: 1fr;
+        }
+    }
 
     /* Pagination */
     .kaza-pagination {
@@ -122,9 +172,13 @@
         margin-top: 50px;
         flex-wrap: wrap;
     }
+
     .kaza-page-btn {
-        width: 36px; height: 36px;
-        display: flex; align-items: center; justify-content: center;
+        width: 36px;
+        height: 36px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
         border: 1px solid var(--glass-border);
         border-radius: 6px;
         font-size: 13px;
@@ -133,10 +187,12 @@
         transition: all .2s;
         cursor: pointer;
     }
-    .kaza-page-btn:hover, .kaza-page-btn.active {
+
+    .kaza-page-btn:hover,
+    .kaza-page-btn.active {
         border-color: var(--cream);
         color: var(--cream);
-        background: rgba(242,232,198,.07);
+        background: rgba(242, 232, 198, .07);
     }
 
     /* Empty state */
@@ -146,7 +202,13 @@
         padding: 70px 20px;
         color: var(--text-muted);
     }
-    .empty-state i { font-size: 48px; display: block; margin-bottom: 16px; opacity: .3; }
+
+    .empty-state i {
+        font-size: 48px;
+        display: block;
+        margin-bottom: 16px;
+        opacity: .3;
+    }
 </style>
 {% endblock %}
 
@@ -179,10 +241,10 @@
             <div class="sidebar-widget">
                 <div class="sidebar-widget-title">Buscar</div>
                 <form action="{% url 'public_shop' %}" method="get">
-                    {% if request.GET.catalog %}<input type="hidden" name="catalog" value="{{ request.GET.catalog }}">{% endif %}
-                    <input type="search" name="q" class="sidebar-search-input"
-                           placeholder="Nombre del producto..."
-                           value="{{ search_query|default:'' }}">
+                    {% if request.GET.catalog %}<input type="hidden" name="catalog" value="{{ request.GET.catalog }}">{%
+                    endif %}
+                    <input type="search" name="q" class="sidebar-search-input" placeholder="Nombre del producto..."
+                        value="{{ search_query|default:'' }}">
                 </form>
             </div>
 
@@ -190,12 +252,13 @@
             {% if catalogs %}
             <div class="sidebar-widget">
                 <div class="sidebar-widget-title">Catálogos</div>
-                <a href="{% url 'public_shop' %}" class="sidebar-link-item {% if not selected_catalog and not search_query %}active{% endif %}">
+                <a href="{% url 'public_shop' %}"
+                    class="sidebar-link-item {% if not selected_catalog and not search_query %}active{% endif %}">
                     Todos <i class="fa fa-angle-right"></i>
                 </a>
                 {% for catalog in catalogs %}
                 <a href="{% url 'public_shop' %}?catalog={{ catalog.id }}"
-                   class="sidebar-link-item {% if selected_catalog.id == catalog.id %}active{% endif %}">
+                    class="sidebar-link-item {% if selected_catalog.id == catalog.id %}active{% endif %}">
                     {{ catalog.name }} <i class="fa fa-angle-right"></i>
                 </a>
                 {% endfor %}
@@ -208,10 +271,10 @@
                 <div class="sidebar-widget-title">Tallas</div>
                 <div class="size-grid">
                     <a href="?{% if request.GET.catalog %}catalog={{ request.GET.catalog }}&{% endif %}{% if search_query %}q={{ search_query }}{% endif %}"
-                       class="size-chip {% if not selected_size %}active{% endif %}">Todas</a>
+                        class="size-chip {% if not selected_size %}active{% endif %}">Todas</a>
                     {% for size in available_sizes %}
                     <a href="?{% if request.GET.catalog %}catalog={{ request.GET.catalog }}&{% endif %}size={{ size }}{% if search_query %}&q={{ search_query }}{% endif %}"
-                       class="size-chip {% if selected_size == size %}active{% endif %}">{{ size }}</a>
+                        class="size-chip {% if selected_size == size %}active{% endif %}">{{ size }}</a>
                     {% endfor %}
                 </div>
             </div>
@@ -227,13 +290,14 @@
                     <strong>{{ products.paginator.count|default:0 }}</strong> productos encontrados
                 </div>
                 <form action="" method="get" id="sort-form">
-                    {% if request.GET.catalog %}<input type="hidden" name="catalog" value="{{ request.GET.catalog }}">{% endif %}
+                    {% if request.GET.catalog %}<input type="hidden" name="catalog" value="{{ request.GET.catalog }}">{%
+                    endif %}
                     {% if search_query %}<input type="hidden" name="q" value="{{ search_query }}">{% endif %}
                     <select class="shop-sort" name="sort" onchange="document.getElementById('sort-form').submit()">
-                        <option value="newest"     {% if sort == 'newest' %}selected{% endif %}>Más Nuevos</option>
-                        <option value="price_asc"  {% if sort == 'price_asc' %}selected{% endif %}>Precio ↑</option>
-                        <option value="price_desc" {% if sort == 'price_desc' %}selected{% endif %}>Precio ↓</option>
-                        <option value="name"       {% if sort == 'name' %}selected{% endif %}>Nombre A-Z</option>
+                        <option value="newest" {% if sort=='newest' %}selected{% endif %}>Más Nuevos</option>
+                        <option value="price_asc" {% if sort=='price_asc' %}selected{% endif %}>Precio ↑</option>
+                        <option value="price_desc" {% if sort=='price_desc' %}selected{% endif %}>Precio ↓</option>
+                        <option value="name" {% if sort=='name' %}selected{% endif %}>Nombre A-Z</option>
                     </select>
                 </form>
             </div>
@@ -262,7 +326,8 @@
                         <div class="product-card-price">${{ product.price }}</div>
                     </div>
                     <div class="product-card-footer">
-                        <a href="{% url 'public_product_detail' product.id %}" class="kaza-btn kaza-btn-outline kaza-btn-full" style="padding:9px; font-size:11px;">
+                        <a href="{% url 'public_product_detail' product.id %}"
+                            class="kaza-btn kaza-btn-outline kaza-btn-full" style="padding:9px; font-size:11px;">
                             Ver Producto
                         </a>
                     </div>
@@ -272,7 +337,8 @@
                     <i class="fa fa-search"></i>
                     <h4 style="color:var(--text-main); margin-bottom:8px;">Sin resultados</h4>
                     <p>Intenta con otra búsqueda o categoría.</p>
-                    <a href="{% url 'public_shop' %}" class="kaza-btn kaza-btn-outline" style="margin-top:20px;">Ver Todo</a>
+                    <a href="{% url 'public_shop' %}" class="kaza-btn kaza-btn-outline" style="margin-top:20px;">Ver
+                        Todo</a>
                 </div>
                 {% endfor %}
             </div>
@@ -281,16 +347,18 @@
             {% if products.has_other_pages %}
             <div class="kaza-pagination">
                 {% if products.has_previous %}
-                <a href="?page={{ products.previous_page_number }}{% if request.GET.catalog %}&catalog={{ request.GET.catalog }}{% endif %}{% if search_query %}&q={{ search_query }}{% endif %}" class="kaza-page-btn">
+                <a href="?page={{ products.previous_page_number }}{% if request.GET.catalog %}&catalog={{ request.GET.catalog }}{% endif %}{% if search_query %}&q={{ search_query }}{% endif %}"
+                    class="kaza-page-btn">
                     <i class="fa fa-angle-left"></i>
                 </a>
                 {% endif %}
                 {% for num in products.paginator.page_range %}
                 <a href="?page={{ num }}{% if request.GET.catalog %}&catalog={{ request.GET.catalog }}{% endif %}{% if search_query %}&q={{ search_query }}{% endif %}"
-                   class="kaza-page-btn {% if products.number == num %}active{% endif %}">{{ num }}</a>
+                    class="kaza-page-btn {% if products.number == num %}active{% endif %}">{{ num }}</a>
                 {% endfor %}
                 {% if products.has_next %}
-                <a href="?page={{ products.next_page_number }}{% if request.GET.catalog %}&catalog={{ request.GET.catalog }}{% endif %}{% if search_query %}&q={{ search_query }}{% endif %}" class="kaza-page-btn">
+                <a href="?page={{ products.next_page_number }}{% if request.GET.catalog %}&catalog={{ request.GET.catalog }}{% endif %}{% if search_query %}&q={{ search_query }}{% endif %}"
+                    class="kaza-page-btn">
                     <i class="fa fa-angle-right"></i>
                 </a>
                 {% endif %}
