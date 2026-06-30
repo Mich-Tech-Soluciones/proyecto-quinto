@@ -175,10 +175,10 @@
                 
                 tr.innerHTML = `
                     <td class="fw-bold text-white">${item.name}</td>
-                    <td><input type="text" class="form-control form-control-sm bg-dark text-white border-secondary text-center" value="${item.size}" onchange="updateItem(${index}, 'size', this.value)"></td>
-                    <td><input type="number" step="0.01" class="form-control form-control-sm bg-dark text-white border-secondary text-center" value="${item.price}" onchange="updateItem(${index}, 'price', this.value)"></td>
-                    <td><input type="number" min="1" class="form-control form-control-sm border-atrium text-center fw-bold" value="${item.quantity}" onchange="updateItem(${index}, 'quantity', this.value)"></td>
-                    <td class="fw-bold">$${(item.price * item.quantity).toFixed(2)}</td>
+                    <td><input type="text" class="form-control form-control-sm bg-dark text-white border-secondary text-center" value="${item.size}" oninput="updateItem(${index}, 'size', this.value)"></td>
+                    <td><input type="number" step="0.01" class="form-control form-control-sm bg-dark text-white border-secondary text-center" value="${item.price}" oninput="updateItem(${index}, 'price', this.value)"></td>
+                    <td><input type="number" min="1" class="form-control form-control-sm border-atrium text-center fw-bold" value="${item.quantity}" oninput="updateItem(${index}, 'quantity', this.value)"></td>
+                    <td class="fw-bold" id="subtotal-${index}">$${(item.price * item.quantity).toFixed(2)}</td>
                     <td class="text-end">
                         <button type="button" class="btn btn-sm btn-outline-danger" onclick="removeItem(${index})"><i class="bi bi-trash"></i></button>
                     </td>
@@ -188,14 +188,19 @@
             
             calculateTotals();
         }
-
+        
         function updateItem(index, field, value) {
             if(field === 'price' || field === 'quantity') {
                 cart[index][field] = parseFloat(value) || 0;
+                // Update subtotal dynamically without losing input focus
+                const subtotalCell = document.getElementById(`subtotal-${index}`);
+                if (subtotalCell) {
+                    subtotalCell.textContent = '$' + (cart[index].price * cart[index].quantity).toFixed(2);
+                }
             } else {
                 cart[index][field] = value;
             }
-            renderCart();
+            calculateTotals();
         }
 
         function removeItem(index) {

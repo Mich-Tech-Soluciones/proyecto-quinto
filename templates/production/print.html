@@ -67,13 +67,34 @@
     </div>
 
     <div class="row">
-        <div class="col-8">
+        <div class="col-4">
             <div class="label-box">Cliente / Institución</div>
             <div class="val-box">{{ sheet.order.customer_name }} {% if sheet.order.company %}({{ sheet.order.company }}){% endif %}</div>
         </div>
         <div class="col-4">
+            <div class="label-box">Teléfono</div>
+            <div class="val-box">{{ sheet.order.customer_phone|default:"-" }}</div>
+        </div>
+        <div class="col-4">
+            <div class="label-box">Email</div>
+            <div class="val-box">{{ sheet.order.customer_email|default:"-" }}</div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-4">
             <div class="label-box">Fecha Pedido</div>
             <div class="val-box">{{ sheet.order.created_at|date:"d/m/Y" }}</div>
+        </div>
+        <div class="col-4">
+            <div class="label-box">Total Venta</div>
+            <div class="val-box">${{ sheet.order.total }}</div>
+        </div>
+        <div class="col-4">
+            <div class="label-box">Pago & Método</div>
+            <div class="val-box">
+                <span class="badge bg-dark">{{ sheet.order.payment_status }}</span> 
+                <small class="text-muted">({{ sheet.order.payment_method }})</small>
+            </div>
         </div>
     </div>
 
@@ -141,9 +162,18 @@
 
     <div style="margin-top: 60px; border-top: 1px solid #ccc; padding-top: 10px;">
         <div class="row text-center text-muted small">
-            <div class="col-4">Firma Diseño</div>
-            <div class="col-4">Firma Producción / Corte</div>
-            <div class="col-4">Firma Control Calidad</div>
+            <div class="col-4">
+                <strong>Firma Diseño</strong><br>
+                <span class="text-dark">{{ sheet.designed_by|default:"____________________" }}</span>
+            </div>
+            <div class="col-4">
+                <strong>Firma Producción / Corte</strong><br>
+                <span class="text-dark">{{ sheet.produced_by|default:"____________________" }}</span>
+            </div>
+            <div class="col-4">
+                <strong>Firma Control Calidad</strong><br>
+                <span class="text-dark">{{ sheet.qc_by|default:"____________________" }}</span>
+            </div>
         </div>
     </div>
 
