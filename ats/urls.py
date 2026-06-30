@@ -3,7 +3,7 @@ from django.urls import path, include
 from django.views.generic import RedirectView
 from django.conf import settings
 from django.conf.urls.static import static
-
+# Rutas principales del proyecto
 urlpatterns = [
     path('admin/', RedirectView.as_view(url='/private/admin/', permanent=False)),
     path('accounts/', include('django.contrib.auth.urls')),
