@@ -87,6 +87,10 @@ python manage.py runserver 8000
 ```
 
 ---
+## Instalación
+
+pip install -r requirements.txt
+
 ## Requisitos
 
 - Python
