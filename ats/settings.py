@@ -48,7 +48,9 @@ INSTALLED_APPS = [
     'dashboard',
     'public',
 ]
-
+# ==========================================
+# Middleware del proyecto
+# ==========================================
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
