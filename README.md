@@ -87,6 +87,12 @@ python manage.py runserver 8000
 ```
 
 ---
+## Requisitos
+
+- Python
+- PostgreSQL
+- Django
+
 ## Integrantes
 
 Sofia Chamorro
