@@ -80,6 +80,9 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'ats.wsgi.application'
 
+# ==========================================
+# Configuración de la base de datos
+# ==========================================
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
