@@ -184,16 +184,12 @@ class OrderCreateUpdateView(SalesPermissionMixin, View):
             except Exception:
                 items = []
 
-            abono = request.POST.get('abono', '')
-            try:
-                abono = Decimal(abono) if abono != '' else Decimal('0.00')
-            except Exception:
-                abono = Decimal('0.00')
+            abono = _parse_decimal(request.POST.get('abono', ''), default='0.00')
 
             # calcular total desde items si hay items
             total = Decimal('0.00')
             for it in items:
-                price = Decimal(str(it.get('price', '0') or '0'))
+                price = _parse_decimal(it.get('price', '0'), default='0')
                 qty = int(it.get('quantity', 0) or 0)
                 total += price * qty
 
@@ -234,7 +230,7 @@ class OrderCreateUpdateView(SalesPermissionMixin, View):
                     product = None
 
                 qty = int(it.get('quantity', 0) or 0)
-                unit_price = Decimal(str(it.get('price', '0') or '0'))
+                unit_price = _parse_decimal(it.get('price', '0'), default='0')
 
                 OrderDetail.objects.create(
                     order=order,
