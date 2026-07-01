@@ -23,6 +23,8 @@
 <div class="glass-card p-4" style="max-width: 850px;">
     <form method="post" enctype="multipart/form-data">
         {% csrf_token %}
+        <input type="hidden" name="cart_data" id="cart_data" value="[]">
+        <input type="hidden" name="abono" id="abono" value="">
 
         <div class="row g-3">
             <div class="col-md-6">
@@ -64,6 +66,10 @@
             <div class="col-12">
                 <label class="form-label small text-white-50">Diseño Adjunto</label>
                 {{ form.design_image }}
+            </div>
+            <div class="col-md-4">
+                <label class="form-label small text-white-50">Abono</label>
+                <input type="number" step="0.01" name="abono" id="abono_input" class="form-control" placeholder="0.00">
             </div>
         </div>
 
