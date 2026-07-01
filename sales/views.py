@@ -201,6 +201,20 @@ class OrderCreateUpdateView(SalesPermissionMixin, View):
             if items:
                 order.total = total
 
+            # validar abono
+            if abono > order.total:
+                abono = order.total
+                messages.warning(request, 'El abono no puede ser mayor al total; se ajustó al total de la orden.')
+
+            # actualizar estado de pago según abono
+            if order.total > Decimal('0.00'):
+                if abono >= order.total:
+                    order.payment_status = 'Completado'
+                elif abono > Decimal('0.00'):
+                    order.payment_status = 'Parcial'
+                else:
+                    order.payment_status = 'Pendiente'
+
             order.save()
 
             # Si estamos editando, restaurar stock de detalles previos antes de rehacer
