@@ -24,7 +24,6 @@
     <form method="post" enctype="multipart/form-data">
         {% csrf_token %}
         <input type="hidden" name="cart_data" id="cart_data" value="[]">
-        <input type="hidden" name="abono" id="abono" value="">
 
         <div class="row g-3">
             <div class="col-md-6">
@@ -75,7 +74,7 @@
 
         <div class="mt-4 text-end">
             <button type="submit" class="btn btn-atrium px-4">
-                <i class="bi bi-save"></i> Guardar Orden
+                <i class="bi bi-save"></i> {% if order %}Actualizar Orden{% else %}Guardar Orden{% endif %}
             </button>
             <button type="submit" name="save_and_new" value="1" class="btn btn-outline-light ms-2">Guardar y nuevo</button>
         </div>

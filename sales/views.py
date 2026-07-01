@@ -181,6 +181,7 @@ class OrderCreateUpdateView(SalesPermissionMixin, View):
     def post(self, request, pk=None):
         order = get_object_or_404(Order, pk=pk) if pk else None
         form = OrderForm(request.POST, request.FILES, instance=order)
+        is_edit = pk and order is not None
 
         if form.is_valid():
             # Procesar carrito si viene en el formulario (JSON)
@@ -202,7 +203,7 @@ class OrderCreateUpdateView(SalesPermissionMixin, View):
             # Antes de guardar, validar stock disponible (considerando restauración si es edición)
             # Construir mapping de cantidades previas por producto cuando se edita
             prev_qty_map = {}
-            if pk and order:
+            if is_edit:
                 for prev in order.details.all():
                     if prev.product:
                         prev_qty_map[prev.product.id] = prev_qty_map.get(prev.product.id, 0) + prev.quantity
@@ -237,19 +238,10 @@ class OrderCreateUpdateView(SalesPermissionMixin, View):
                 abono = order.total
                 messages.warning(request, 'El abono no puede ser mayor al total; se ajustó al total de la orden.')
 
-            # actualizar estado de pago según abono
-            if order.total > Decimal('0.00'):
-                if abono >= order.total:
-                    order.payment_status = 'Completado'
-                elif abono > Decimal('0.00'):
-                    order.payment_status = 'Parcial'
-                else:
-                    order.payment_status = 'Pendiente'
-
             order.save()
 
-            # Si estamos editando, restaurar stock de detalles previos antes de rehacer
-            if pk:
+            # Si estamos editando y hay items nuevos, restaurar stock de detalles previos antes de rehacer
+            if is_edit and items:
                 for prev in order.details.all():
                     if prev.product:
                         prev_prod = prev.product
@@ -304,6 +296,8 @@ class OrderCreateUpdateView(SalesPermissionMixin, View):
             # Si se pidió guardar y crear nuevo, redirigir a creación
             if request.POST.get('save_and_new'):
                 return redirect('order_create')
+            if is_edit:
+                return redirect('sales_history')
             return redirect('order_detail', pk=order.pk)
 
         context = {

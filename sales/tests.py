@@ -170,3 +170,44 @@ class SalesViewTests(SalesTestBase):
         self.assertIsNotNone(order)
         self.assertEqual(order.total, 100.00)
         self.assertEqual(order.paid_amount, 20.00)
+
+    def test_order_update_saves_changes_and_preserves_existing_details(self):
+        order = Order.objects.create(
+            customer_name='Cliente Original',
+            company='Empresa Original',
+            total=100.00,
+            payment_method='Efectivo',
+            payment_status='Pendiente',
+            status='Pendiente',
+            user=self.user,
+        )
+        OrderDetail.objects.create(
+            order=order,
+            product=self.product,
+            size='M',
+            quantity=1,
+            unit_price=100.00,
+            unit_cost=60.00,
+        )
+
+        response = self.client.post(reverse('order_update', args=[order.pk]), {
+            'customer_name': 'Cliente Editado',
+            'company': 'Empresa Editada',
+            'customer_phone': '11122233',
+            'customer_email': 'edit@test.com',
+            'payment_method': 'Transferencia',
+            'payment_status': 'Completado',
+            'status': 'Pagado',
+            'technical_specs': 'Especificaciones actualizadas',
+            'notes': 'Notas de edición',
+            'abono': '0.00',
+            'cart_data': '[]',
+        })
+
+        self.assertRedirects(response, reverse('sales_history'))
+        order.refresh_from_db()
+        self.assertEqual(order.customer_name, 'Cliente Editado')
+        self.assertEqual(order.company, 'Empresa Editada')
+        self.assertEqual(order.payment_method, 'Transferencia')
+        self.assertEqual(order.status, 'Pagado')
+        self.assertEqual(order.details.count(), 1)
