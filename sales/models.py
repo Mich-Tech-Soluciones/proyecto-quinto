@@ -64,8 +64,23 @@ class Order(models.Model):
         ordering = ['-created_at']
 
     def save(self, *args, **kwargs):
-        if self.payment_status == 'Completado':
-            self.status = 'Pagado'
+        if self.pk:
+            paid_amount = self.paid_amount
+            if self.total and paid_amount >= Decimal(self.total):
+                self.payment_status = 'Completado'
+                self.status = 'Pagado'
+            elif paid_amount > Decimal('0.00'):
+                if self.payment_status != 'Completado':
+                    self.payment_status = 'Parcial'
+            else:
+                if self.payment_status == 'Completado' or self.status == 'Pagado':
+                    self.payment_status = 'Completado'
+                    self.status = 'Pagado'
+                else:
+                    self.payment_status = 'Pendiente'
+        else:
+            if self.payment_status == 'Completado':
+                self.status = 'Pagado'
         super().save(*args, **kwargs)
 
     @property
@@ -138,6 +153,11 @@ class Payment(models.Model):
         verbose_name = "Pago"
         verbose_name_plural = "Pagos"
         ordering = ['-date']
+
+    def save(self, *args, **kwargs):
+        super().save(*args, **kwargs)
+        if self.order:
+            self.order.save()
 
     def __str__(self):
         return f"Abono ${self.amount} - {self.order.id}"

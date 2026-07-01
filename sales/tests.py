@@ -225,3 +225,19 @@ class SalesViewTests(SalesTestBase):
 
         order.refresh_from_db()
         self.assertEqual(order.status, 'Pagado')
+
+    def test_order_updates_status_when_payment_registered(self):
+        order = Order.objects.create(
+            customer_name='Cliente Pago Automático',
+            total=150.00,
+            payment_method='Efectivo',
+            payment_status='Pendiente',
+            status='Pendiente',
+            user=self.user,
+        )
+
+        Payment.objects.create(order=order, amount=150.00, payment_method='Efectivo', user=self.user)
+        order.refresh_from_db()
+
+        self.assertEqual(order.payment_status, 'Completado')
+        self.assertEqual(order.status, 'Pagado')

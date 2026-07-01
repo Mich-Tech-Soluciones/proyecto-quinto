@@ -44,6 +44,19 @@ def payment_recorded(sender, instance, created, **kwargs):
     """
     if created:
         logger.info(f"Pago registrado: ${instance.amount} para orden #{instance.order.id}")
+        order = instance.order
+        if order:
+            total_pagado = order.paid_amount
+            if order.total > 0 and total_pagado >= order.total:
+                order.payment_status = 'Completado'
+                order.status = 'Pagado'
+            elif total_pagado > 0:
+                order.payment_status = 'Parcial'
+                if order.status == 'Pagado':
+                    order.status = 'Pagado'
+            else:
+                order.payment_status = 'Pendiente'
+            order.save(update_fields=['payment_status', 'status'])
 
 
 def send_order_confirmation_email(order):
