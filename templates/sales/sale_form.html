@@ -81,3 +81,21 @@
     </form>
 </div>
 {% endblock %}
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function(){
+    const form = document.querySelector('form');
+    form && form.addEventListener('submit', function(e){
+        const cart = document.getElementById('cart_data');
+        try{
+            const items = JSON.parse(cart && cart.value || '[]');
+            if (!items || items.length === 0){
+                if (!confirm('No se han agregado productos al pedido. ¿Deseas guardar la orden igualmente?')){
+                    e.preventDefault();
+                }
+            }
+        }catch(err){/* ignore */}
+    });
+});
+</script>
+{% endblock %}
