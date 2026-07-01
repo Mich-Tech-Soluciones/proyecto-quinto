@@ -72,6 +72,12 @@ class SalesViewTests(SalesTestBase):
         self.assertContains(response, 'Detalle de la Venta')
         self.assertContains(response, self.product.name)
 
+    def test_sales_root_shows_history(self):
+        response = self.client.get(reverse('sales_root'))
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, 'Historial de Ventas')
+        self.assertContains(response, 'Nuevo pedido')
+
     def test_sales_pos_creates_order_and_reduces_stock(self):
         cart_data = [
             {
@@ -116,6 +122,13 @@ class SalesViewTests(SalesTestBase):
         response = self.client.get(reverse('sales_history'))
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, 'Historial de Ventas')
+
+    def test_sales_history_page_shows_new_sale_button(self):
+        response = self.client.get(reverse('sales_history'))
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, 'Nuevo pedido')
+        self.assertContains(response, 'Ver reporte')
+        self.assertContains(response, reverse('sales_pos'))
 
     def test_order_detail_page_displays_order(self):
         order = Order.objects.create(

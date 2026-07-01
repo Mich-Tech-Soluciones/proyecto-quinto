@@ -11,8 +11,8 @@ from .views import (
 )
 
 urlpatterns = [
-    # Al abrir /sales/ redirigir al historial; POS queda en /sales/pos/
-    path('', RedirectView.as_view(url=reverse_lazy('sales_history'))),
+    # Al abrir el módulo de ventas, mostrar directamente el historial de órdenes.
+    path('', OrderListView.as_view(), name='sales_root'),
     path('pos/', ManageSalesView.as_view(), name='sales_pos'),
     path('historial/', OrderListView.as_view(), name='sales_history'),
     path('historial/reporte/', SalesReportView.as_view(), name='sales_report'),
