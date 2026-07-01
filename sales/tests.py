@@ -130,3 +130,30 @@ class SalesViewTests(SalesTestBase):
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, 'Detalle de Orden')
         self.assertContains(response, 'Cliente Detalle')
+
+    def test_order_create_view_saves_order_with_cart(self):
+        cart_data = [
+            {
+                'id': self.product.id,
+                'name': self.product.name,
+                'price': '100.00',
+                'quantity': 1,
+                'size': 'M',
+            }
+        ]
+        response = self.client.post(reverse('order_create'), {
+            'customer_name': 'Cliente Form',
+            'company': 'Empresa X',
+            'payment_method': 'Efectivo',
+            'payment_status': 'Pendiente',
+            'status': 'Pendiente',
+            'cart_data': json.dumps(cart_data),
+            'abono': '20.00',
+        })
+
+        # Debe redirigir a detalle
+        self.assertEqual(response.status_code, 302)
+        order = Order.objects.filter(customer_name='Cliente Form').first()
+        self.assertIsNotNone(order)
+        self.assertEqual(order.total, 100.00)
+        self.assertEqual(order.paid_amount, 20.00)
