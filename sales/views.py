@@ -270,6 +270,9 @@ class OrderCreateUpdateView(SalesPermissionMixin, View):
                     )
 
             messages.success(request, 'Orden guardada correctamente.')
+            # Si se pidió guardar y crear nuevo, redirigir a creación
+            if request.POST.get('save_and_new'):
+                return redirect('order_create')
             return redirect('order_detail', pk=order.pk)
 
         context = {
