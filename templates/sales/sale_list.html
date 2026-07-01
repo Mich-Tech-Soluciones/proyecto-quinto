@@ -69,7 +69,7 @@
                     <td>{{ order.id }}</td>
                     <td class="text-muted small">{{ order.created_at|date:"d/m/Y H:i" }}</td>
                     <td>{{ order.customer_name|default:order.company|default:"Consumidor Final" }}</td>
-                    <td class="text-success fw-bold">${{ order.total }}</td>
+                    <td class="text-success fw-bold">${{ order.total|floatformat:2 }}</td>
                     <td>
                         {% if order.payment_status == 'Completado' %}
                         <span class="badge bg-success">{{ order.payment_status }}</span>
