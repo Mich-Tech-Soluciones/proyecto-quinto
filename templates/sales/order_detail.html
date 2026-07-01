@@ -32,6 +32,14 @@
             <div class="fw-bold text-success">${{ order.total }}</div>
         </div>
         <div class="col-md-4">
+            <div class="text-white-50 small">Pagado</div>
+            <div class="fw-bold text-white">${{ order.paid_amount }}</div>
+        </div>
+        <div class="col-md-4">
+            <div class="text-white-50 small">Saldo pendiente</div>
+            <div class="fw-bold text-warning">${{ order.balance }}</div>
+        </div>
+        <div class="col-md-4">
             <div class="text-white-50 small">Fecha</div>
             <div>{{ order.created_at|date:'d/m/Y H:i' }}</div>
         </div>

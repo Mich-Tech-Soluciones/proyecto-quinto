@@ -1,5 +1,6 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.views import View
+from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.db import transaction
 from django.db.models import Q, Sum
@@ -16,12 +17,23 @@ class SalesPermissionMixin(LoginRequiredMixin, UserPassesTestMixin):
 
 class ManageSalesView(SalesPermissionMixin, View):
     def get(self, request):
-        products = Product.objects.filter(stock__gt=0).order_by('catalog', 'category', 'name')
+        products = Product.objects.filter(stock__gt=0).select_related('category__catalog').order_by('category__catalog__name', 'category__name', 'name')
         catalogs = Catalog.objects.all()
         categories = Category.objects.all()
 
+        product_rows = []
+        for product in products:
+            product_rows.append({
+                'id': product.id,
+                'price': product.price,
+                'name': product.name,
+                'stock': product.stock,
+                'catalog_name': product.category.catalog.name if product.category and product.category.catalog else 'Sin catálogo',
+                'category_name': product.category.name if product.category else 'Sin categoría',
+            })
+
         context = {
-            'products': products,
+            'products': product_rows,
             'catalogs': catalogs,
             'categories': categories,
         }
@@ -44,6 +56,10 @@ class ManageSalesView(SalesPermissionMixin, View):
             items = json.loads(cart_data)
         except Exception:
             items = []
+
+        if not items:
+            messages.error(request, 'Debes agregar productos al carrito antes de confirmar la venta.')
+            return redirect('sales_pos')
 
         abono = float(request.POST.get('abono', 0) or 0)
         total = sum(float(item['price']) * int(item['quantity']) for item in items)
@@ -125,11 +141,13 @@ class OrderListView(SalesPermissionMixin, View):
             orders = orders.filter(status=status)
 
         orders = orders.order_by('-created_at').select_related('user')
+        total_orders = orders.count()
 
         context = {
             'orders': orders,
             'query': query,
             'status': status,
+            'total_orders': total_orders,
         }
         return render(request, 'sales/sale_list.html', context)
 

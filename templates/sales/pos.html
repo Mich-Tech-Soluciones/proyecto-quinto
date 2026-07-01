@@ -88,7 +88,7 @@
                             <option value="">-- Seleccionar Producto --</option>
                             {% for p in products %}
                             <option value="{{ p.id }}" data-price="{{ p.price }}" data-name="{{ p.name }}">
-                                {{ p.category.catalog.name }} > {{ p.category.name }} | {{ p.name }} (${{ p.price }}) - Stock: {{ p.stock }}
+                                {{ p.catalog_name }} > {{ p.category_name }} | {{ p.name }} (${{ p.price }}) - Stock: {{ p.stock }}
                             </option>
                             {% endfor %}
                         </select>
@@ -130,18 +130,19 @@
                             <div class="small mt-1 text-danger fw-bold" id="saldoDisplay" style="display: none;">Saldo a pagar: $0.00</div>
                         </div>
                     </div>
-                    
-                    <button type="submit" class="btn btn-atrium btn-lg w-100 mt-4 fw-bold py-3 shadow-lg" style="letter-spacing: 1px;">
-                        <i class="bi bi-check2-circle fs-5 me-2"></i> CONFIRMAR VENTA
-                    </button>
+                <div class="row mt-3">
+                    <div class="col-12">
+                        <div class="alert alert-info py-3 mb-0" role="alert">
+                            Recuerda: los productos se descuentan del stock solo después de confirmar la venta. Si el stock no es suficiente, la orden se creará pero el producto podrá quedar sin movimiento de inventario.
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 </form>
 
-    <!-- SweetAlert2 CDN -->
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
         let cart = [];
 
