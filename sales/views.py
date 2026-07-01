@@ -82,6 +82,7 @@ class ManageSalesView(SalesPermissionMixin, View):
 
         if abono >= total and total > 0:
             payment_status = 'Completado'
+            estado = 'Pagado'
         elif abono > 0:
             payment_status = 'Parcial'
         else:
@@ -236,6 +237,11 @@ class OrderCreateUpdateView(SalesPermissionMixin, View):
             order = form.save(commit=False)
             if not order.pk:
                 order.user = request.user
+
+            if order.payment_status == 'Completado':
+                order.status = 'Pagado'
+            elif order.status == 'Pagado' and order.payment_status != 'Completado':
+                order.payment_status = 'Completado'
 
             # si vinieron items, asignar total calculado
             if items:

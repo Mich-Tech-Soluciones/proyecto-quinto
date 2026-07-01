@@ -63,6 +63,11 @@ class Order(models.Model):
         verbose_name_plural = "Órdenes de Venta"
         ordering = ['-created_at']
 
+    def save(self, *args, **kwargs):
+        if self.payment_status == 'Completado':
+            self.status = 'Pagado'
+        super().save(*args, **kwargs)
+
     @property
     def paid_amount(self):
         """Calcula el monto total pagado"""

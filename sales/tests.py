@@ -210,4 +210,18 @@ class SalesViewTests(SalesTestBase):
         self.assertEqual(order.company, 'Empresa Editada')
         self.assertEqual(order.payment_method, 'Transferencia')
         self.assertEqual(order.status, 'Pagado')
+        self.assertEqual(order.payment_status, 'Completado')
         self.assertEqual(order.details.count(), 1)
+
+    def test_order_auto_marks_paid_when_payment_completed(self):
+        order = Order.objects.create(
+            customer_name='Cliente Pagado',
+            total=100.00,
+            payment_method='Efectivo',
+            payment_status='Completado',
+            status='Pendiente',
+            user=self.user,
+        )
+
+        order.refresh_from_db()
+        self.assertEqual(order.status, 'Pagado')
