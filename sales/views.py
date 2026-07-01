@@ -180,7 +180,15 @@ class OrderCreateUpdateView(SalesPermissionMixin, View):
 
     def post(self, request, pk=None):
         order = get_object_or_404(Order, pk=pk) if pk else None
-        form = OrderForm(request.POST, request.FILES, instance=order)
+        post_data = request.POST.copy()
+        if order is not None:
+            if not post_data.get('payment_method'):
+                post_data['payment_method'] = order.payment_method or 'Efectivo'
+            if not post_data.get('payment_status'):
+                post_data['payment_status'] = order.payment_status or 'Pendiente'
+            if not post_data.get('status'):
+                post_data['status'] = order.status or 'Pendiente'
+        form = OrderForm(post_data, request.FILES, instance=order)
         is_edit = pk and order is not None
 
         if form.is_valid():

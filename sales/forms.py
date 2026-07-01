@@ -22,7 +22,7 @@ class OrderForm(forms.ModelForm):
             'customer_phone': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Teléfono'}),
             'customer_email': forms.EmailInput(attrs={'class': 'form-control', 'placeholder': 'Email'}),
             'company': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Empresa'}),
-            'payment_method': forms.Select(attrs={'class': 'form-select'}),
+            'payment_method': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Método de pago'}),
             'payment_status': forms.Select(attrs={'class': 'form-select'}),
             'status': forms.Select(attrs={'class': 'form-select'}),
             'technical_specs': forms.Textarea(attrs={'class': 'form-control', 'rows': 3, 'placeholder': 'Especificaciones técnicas'}),
