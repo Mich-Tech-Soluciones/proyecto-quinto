@@ -299,6 +299,7 @@ class OrderDeleteView(SalesPermissionMixin, View):
     def post(self, request, pk):
         order = get_object_or_404(Order, pk=pk)
         order.delete()
+        messages.success(request, 'Orden eliminada correctamente.')
         return redirect('sales_history')
 
 
