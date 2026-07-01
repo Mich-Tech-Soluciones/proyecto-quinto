@@ -1,6 +1,8 @@
 """
 Modelos para el módulo de ventas
 """
+from decimal import Decimal
+
 from django.db import models
 from django.conf import settings
 from inventory.models import Product
@@ -64,12 +66,12 @@ class Order(models.Model):
     @property
     def paid_amount(self):
         """Calcula el monto total pagado"""
-        return sum(payment.amount for payment in self.payments.all())
+        return sum((payment.amount for payment in self.payments.all()), Decimal('0.00'))
         
     @property
     def balance(self):
         """Calcula el saldo pendiente"""
-        return self.total - self.paid_amount
+        return Decimal(self.total) - self.paid_amount
 
 
 class OrderDetail(models.Model):
@@ -104,7 +106,8 @@ class OrderDetail(models.Model):
         return self.quantity * self.unit_price
 
     def __str__(self):
-        return f"{self.order.id} - {self.custom_name or self.product.name}"
+        product_name = self.product.name if self.product else 'Producto eliminado'
+        return f"{self.order.id} - {self.custom_name or product_name}"
 
 
 class Payment(models.Model):

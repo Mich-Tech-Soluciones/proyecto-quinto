@@ -60,6 +60,7 @@ class OrderModelTests(SalesTestBase):
             unit_cost=60.00,
         )
         self.product.delete()
+        detail.refresh_from_db()
 
         self.assertIn('Producto eliminado', str(detail))
 

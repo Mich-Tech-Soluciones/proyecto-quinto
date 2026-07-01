@@ -71,14 +71,22 @@
                     <td>{{ order.customer_name|default:order.company|default:"Consumidor Final" }}</td>
                     <td class="text-success fw-bold">${{ order.total }}</td>
                     <td>
-                        <span class="badge bg-{{ 'success' if order.payment_status == 'Completado' else 'info' if order.payment_status == 'Parcial' else 'warning' }}">
-                            {{ order.payment_status }}
-                        </span>
+                        {% if order.payment_status == 'Completado' %}
+                        <span class="badge bg-success">{{ order.payment_status }}</span>
+                        {% elif order.payment_status == 'Parcial' %}
+                        <span class="badge bg-info">{{ order.payment_status }}</span>
+                        {% else %}
+                        <span class="badge bg-warning">{{ order.payment_status }}</span>
+                        {% endif %}
                     </td>
                     <td>
-                        <span class="badge bg-{{ 'success' if order.status == 'Pagado' else 'primary' if order.status == 'Enviado' else 'secondary' }}">
-                            {{ order.status }}
-                        </span>
+                        {% if order.status == 'Pagado' %}
+                        <span class="badge bg-success">{{ order.status }}</span>
+                        {% elif order.status == 'Enviado' %}
+                        <span class="badge bg-primary">{{ order.status }}</span>
+                        {% else %}
+                        <span class="badge bg-secondary">{{ order.status }}</span>
+                        {% endif %}
                     </td>
                     <td>
                         <div class="btn-group" role="group">
