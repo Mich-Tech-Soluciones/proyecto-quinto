@@ -62,6 +62,21 @@ class ManageSalesView(SalesPermissionMixin, View):
             messages.error(request, 'Debes agregar productos al carrito antes de confirmar la venta.')
             return redirect('sales_pos')
 
+        # Validación: impedir crear la orden si algún producto tiene stock insuficiente
+        insufficient = []
+        for item in items:
+            try:
+                product = Product.objects.get(id=item.get('id'))
+            except Product.DoesNotExist:
+                product = None
+            qty = int(item.get('quantity', 0) or 0)
+            if product and (product.stock or 0) < qty:
+                insufficient.append(f"{product.name} (disponible: {product.stock}, requerido: {qty})")
+
+        if insufficient:
+            messages.error(request, 'Stock insuficiente para: ' + ', '.join(insufficient))
+            return redirect('sales_pos')
+
         abono = float(request.POST.get('abono', 0) or 0)
         total = sum(float(item['price']) * int(item['quantity']) for item in items)
 
@@ -183,6 +198,31 @@ class OrderCreateUpdateView(SalesPermissionMixin, View):
                 price = _parse_decimal(it.get('price', '0'), default='0')
                 qty = int(it.get('quantity', 0) or 0)
                 total += price * qty
+
+            # Antes de guardar, validar stock disponible (considerando restauración si es edición)
+            # Construir mapping de cantidades previas por producto cuando se edita
+            prev_qty_map = {}
+            if pk and order:
+                for prev in order.details.all():
+                    if prev.product:
+                        prev_qty_map[prev.product.id] = prev_qty_map.get(prev.product.id, 0) + prev.quantity
+
+            # Validar cada item
+            insufficient = []
+            for it in items:
+                try:
+                    product = Product.objects.get(id=it.get('id'))
+                except Product.DoesNotExist:
+                    product = None
+                qty = int(it.get('quantity', 0) or 0)
+                available = (product.stock or 0) + (prev_qty_map.get(product.id, 0) if product else 0)
+                if product and available < qty:
+                    insufficient.append(f"{product.name} (disponible: {available}, requerido: {qty})")
+
+            if insufficient:
+                messages.error(request, 'Stock insuficiente para: ' + ', '.join(insufficient))
+                context = {'form': form, 'order': order}
+                return render(request, 'sales/sale_form.html', context)
 
             order = form.save(commit=False)
             if not order.pk:
