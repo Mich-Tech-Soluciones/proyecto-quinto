@@ -1,4 +1,6 @@
 from django.urls import path
+from django.views.generic.base import RedirectView
+from django.urls import reverse_lazy
 from .views import (
     ManageSalesView,
     OrderListView,
@@ -9,7 +11,9 @@ from .views import (
 )
 
 urlpatterns = [
-    path('', ManageSalesView.as_view(), name='sales_pos'),
+    # Al abrir /sales/ redirigir al historial; POS queda en /sales/pos/
+    path('', RedirectView.as_view(url=reverse_lazy('sales_history'))),
+    path('pos/', ManageSalesView.as_view(), name='sales_pos'),
     path('historial/', OrderListView.as_view(), name='sales_history'),
     path('historial/reporte/', SalesReportView.as_view(), name='sales_report'),
     path('orden/nuevo/', OrderCreateUpdateView.as_view(), name='order_create'),

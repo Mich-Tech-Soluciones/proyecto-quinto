@@ -28,8 +28,17 @@ class SalesPermissionMixin(LoginRequiredMixin, UserPassesTestMixin):
 
 class ManageSalesView(SalesPermissionMixin, View):
     def get(self, request):
-        # Al abrir el módulo, mostrar el historial de ventas (lista de órdenes)
-        return redirect('sales_history')
+        # Servir la interfaz POS para agregar productos al carrito
+        products = Product.objects.filter(stock__gt=0).order_by('name')
+        catalogs = Catalog.objects.all()
+        categories = Category.objects.all()
+
+        context = {
+            'products': products,
+            'catalogs': catalogs,
+            'categories': categories,
+        }
+        return render(request, 'sales/pos.html', context)
 
     @transaction.atomic
     def post(self, request):
