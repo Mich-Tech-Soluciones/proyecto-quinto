@@ -5,6 +5,16 @@ from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.db import transaction
 from django.db.models import Q, Sum
 import json
+from decimal import Decimal
+from django.contrib import messages
+
+
+def _parse_decimal(value, default='0.00'):
+    """Parsea valores a Decimal de forma segura."""
+    try:
+        return Decimal(str(value))
+    except Exception:
+        return Decimal(str(default))
 from inventory.models import Product, Catalog, Category, Kardex
 from .models import Order, OrderDetail, Payment
 from .forms import OrderForm
@@ -167,10 +177,89 @@ class OrderCreateUpdateView(SalesPermissionMixin, View):
         form = OrderForm(request.POST, request.FILES, instance=order)
 
         if form.is_valid():
+            # Procesar carrito si viene en el formulario (JSON)
+            cart_data = request.POST.get('cart_data', '[]')
+            try:
+                items = json.loads(cart_data)
+            except Exception:
+                items = []
+
+            abono = request.POST.get('abono', '')
+            try:
+                abono = Decimal(abono) if abono != '' else Decimal('0.00')
+            except Exception:
+                abono = Decimal('0.00')
+
+            # calcular total desde items si hay items
+            total = Decimal('0.00')
+            for it in items:
+                price = Decimal(str(it.get('price', '0') or '0'))
+                qty = int(it.get('quantity', 0) or 0)
+                total += price * qty
+
             order = form.save(commit=False)
             if not order.pk:
                 order.user = request.user
+
+            # si vinieron items, asignar total calculado
+            if items:
+                order.total = total
+
             order.save()
+
+            # Si estamos editando, restaurar stock de detalles previos antes de rehacer
+            if pk:
+                for prev in order.details.all():
+                    if prev.product:
+                        prev_prod = prev.product
+                        prev_prod.stock = (prev_prod.stock or 0) + prev.quantity
+                        prev_prod.save()
+                order.details.all().delete()
+
+            # Registrar pago inicial si aplica
+            if abono > Decimal('0.00'):
+                Payment.objects.create(
+                    order=order,
+                    amount=abono,
+                    payment_method=order.payment_method,
+                    note='Abono inicial (registro manual)',
+                    user=request.user,
+                )
+
+            # Crear detalles y actualizar stock y kardex
+            for it in items:
+                try:
+                    product = Product.objects.get(id=it.get('id'))
+                except Product.DoesNotExist:
+                    product = None
+
+                qty = int(it.get('quantity', 0) or 0)
+                unit_price = Decimal(str(it.get('price', '0') or '0'))
+
+                OrderDetail.objects.create(
+                    order=order,
+                    product=product,
+                    size=it.get('size', ''),
+                    quantity=qty,
+                    unit_price=unit_price,
+                    unit_cost=getattr(product, 'cost', Decimal('0.00')) if product else Decimal('0.00'),
+                )
+
+                if product and product.stock >= qty:
+                    prev_stock = product.stock
+                    product.stock -= qty
+                    product.save()
+                    Kardex.objects.create(
+                        product=product,
+                        movement_type='Salida',
+                        quantity=qty,
+                        prev_stock=prev_stock,
+                        new_stock=product.stock,
+                        reason=f'Venta (Pedido #{order.id})',
+                        user=request.user,
+                    )
+
+            messages.success(request, 'Orden guardada correctamente.')
             return redirect('order_detail', pk=order.pk)
 
         context = {
