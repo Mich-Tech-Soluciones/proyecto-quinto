@@ -1,0 +1,68 @@
+{% extends "base.html" %}
+
+{% block page_title %}Reporte de Ventas{% endblock %}
+
+{% block content %}
+<div class="d-flex flex-column flex-md-row justify-content-between align-items-start gap-3 mb-4">
+    <div>
+        <h3 class="text-white mb-1">Reporte de Ventas</h3>
+        <p class="text-muted small mb-0">Resumen rápido del desempeño de ventas y los pedidos más recientes.</p>
+    </div>
+    <a href="{% url 'sales_history' %}" class="btn btn-outline-light btn-sm">
+        <i class="bi bi-arrow-left"></i> Volver al historial
+    </a>
+</div>
+
+<div class="row g-3 mb-4">
+    <div class="col-md-4">
+        <div class="glass-card p-4 h-100">
+            <div class="text-white-50 small">Ventas totales</div>
+            <div class="text-success fw-bold fs-4">${{ summary.total_sales }}</div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="glass-card p-4 h-100">
+            <div class="text-white-50 small">Ventas completadas</div>
+            <div class="text-success fw-bold fs-4">${{ summary.completed_sales }}</div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="glass-card p-4 h-100">
+            <div class="text-white-50 small">Ventas pendientes</div>
+            <div class="text-warning fw-bold fs-4">${{ summary.pending_sales }}</div>
+        </div>
+    </div>
+</div>
+
+<div class="glass-card p-4">
+    <h5 class="text-white mb-3">Órdenes recientes</h5>
+    <div class="table-responsive">
+        <table class="table custom-table mb-0">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Cliente</th>
+                    <th>Total</th>
+                    <th>Pago</th>
+                    <th>Fecha</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for order in recent_orders %}
+                <tr>
+                    <td>{{ order.id }}</td>
+                    <td>{{ order.customer_name|default:order.company|default:'Consumidor Final' }}</td>
+                    <td class="text-success">${{ order.total }}</td>
+                    <td>{{ order.payment_status }}</td>
+                    <td class="text-muted small">{{ order.created_at|date:'d/m/Y H:i' }}</td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="5" class="text-center text-muted">No hay órdenes recientes.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

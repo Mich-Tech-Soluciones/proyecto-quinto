@@ -1,6 +1,8 @@
 """
 Modelos para el módulo de ventas
 """
+from decimal import Decimal
+
 from django.db import models
 from django.conf import settings
 from inventory.models import Product
@@ -61,15 +63,35 @@ class Order(models.Model):
         verbose_name_plural = "Órdenes de Venta"
         ordering = ['-created_at']
 
+    def save(self, *args, **kwargs):
+        if self.pk:
+            paid_amount = self.paid_amount
+            if self.total and paid_amount >= Decimal(self.total):
+                self.payment_status = 'Completado'
+                self.status = 'Pagado'
+            elif paid_amount > Decimal('0.00'):
+                if self.payment_status != 'Completado':
+                    self.payment_status = 'Parcial'
+            else:
+                if self.payment_status == 'Completado' or self.status == 'Pagado':
+                    self.payment_status = 'Completado'
+                    self.status = 'Pagado'
+                else:
+                    self.payment_status = 'Pendiente'
+        else:
+            if self.payment_status == 'Completado':
+                self.status = 'Pagado'
+        super().save(*args, **kwargs)
+
     @property
     def paid_amount(self):
         """Calcula el monto total pagado"""
-        return sum(payment.amount for payment in self.payments.all())
+        return sum((payment.amount for payment in self.payments.all()), Decimal('0.00'))
         
     @property
     def balance(self):
         """Calcula el saldo pendiente"""
-        return self.total - self.paid_amount
+        return Decimal(self.total) - self.paid_amount
 
 
 class OrderDetail(models.Model):
@@ -104,7 +126,8 @@ class OrderDetail(models.Model):
         return self.quantity * self.unit_price
 
     def __str__(self):
-        return f"{self.order.id} - {self.custom_name or self.product.name}"
+        product_name = self.product.name if self.product else 'Producto eliminado'
+        return f"{self.order.id} - {self.custom_name or product_name}"
 
 
 class Payment(models.Model):
@@ -130,6 +153,11 @@ class Payment(models.Model):
         verbose_name = "Pago"
         verbose_name_plural = "Pagos"
         ordering = ['-date']
+
+    def save(self, *args, **kwargs):
+        super().save(*args, **kwargs)
+        if self.order:
+            self.order.save()
 
     def __str__(self):
         return f"Abono ${self.amount} - {self.order.id}"

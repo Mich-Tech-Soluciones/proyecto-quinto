@@ -1,0 +1,144 @@
+{% extends "base.html" %}
+
+{% block page_title %}Detalle de Orden #{{ order.id }}{% endblock %}
+
+{% block content %}
+<div class="d-flex flex-column flex-md-row justify-content-between align-items-start gap-3 mb-4">
+    <div>
+        <h3 class="text-white mb-1">Detalle de Orden #{{ order.id }}</h3>
+        <p class="text-muted small mb-0">Revisa la información completa, pagos y productos asociados.</p>
+    </div>
+    <div class="d-flex gap-2">
+        <a href="{% url 'order_update' order.id %}" class="btn btn-atrium btn-sm">
+            <i class="bi bi-pencil-square"></i> Editar
+        </a>
+        <a href="{% url 'order_delete' order.id %}" class="btn btn-danger btn-sm">
+            <i class="bi bi-trash"></i> Eliminar
+        </a>
+        <a href="{% url 'sales_history' %}" class="btn btn-outline-light btn-sm">
+            <i class="bi bi-arrow-left"></i> Volver
+        </a>
+    </div>
+</div>
+
+<div class="glass-card mb-4 p-4">
+    <div class="row gy-3">
+        <div class="col-md-4">
+            <div class="text-white-50 small">Cliente</div>
+            <div class="fw-bold text-white">{{ order.customer_name|default:order.company|default:'Consumidor Final' }}</div>
+        </div>
+        <div class="col-md-4">
+            <div class="text-white-50 small">Total</div>
+            <div class="fw-bold text-success">${{ order.total|floatformat:2 }}</div>
+        </div>
+        <div class="col-md-4">
+            <div class="text-white-50 small">Pagado</div>
+            <div class="fw-bold text-white">${{ order.paid_amount|floatformat:2 }}</div>
+        </div>
+        <div class="col-md-4">
+            <div class="text-white-50 small">Saldo pendiente</div>
+            <div class="fw-bold text-warning">${{ order.balance|floatformat:2 }}</div>
+        </div>
+        <div class="col-md-4">
+            <div class="text-white-50 small">Fecha</div>
+            <div>{{ order.created_at|date:'d/m/Y H:i' }}</div>
+        </div>
+        <div class="col-md-4">
+            <div class="text-white-50 small">Pago</div>
+            {% if order.payment_status == 'Completado' %}
+            <span class="badge bg-success">{{ order.payment_status }}</span>
+            {% elif order.payment_status == 'Parcial' %}
+            <span class="badge bg-info">{{ order.payment_status }}</span>
+            {% else %}
+            <span class="badge bg-warning">{{ order.payment_status }}</span>
+            {% endif %}
+        </div>
+        <div class="col-md-4">
+            <div class="text-white-50 small">Estado</div>
+            {% if order.status == 'Pagado' %}
+            <span class="badge bg-success">{{ order.status }}</span>
+            {% elif order.status == 'Enviado' %}
+            <span class="badge bg-primary">{{ order.status }}</span>
+            {% else %}
+            <span class="badge bg-secondary">{{ order.status }}</span>
+            {% endif %}
+        </div>
+        <div class="col-12">
+            <div class="text-white-50 small">Especificaciones</div>
+            <p class="text-white mb-0">{{ order.technical_specs|default:'Sin especificaciones' }}</p>
+        </div>
+        <div class="col-12">
+            <div class="text-white-50 small">Notas</div>
+            <p class="text-white mb-0">{{ order.notes|default:'Sin notas' }}</p>
+        </div>
+        {% if order.design_image %}
+        <div class="col-12">
+            <div class="text-white-50 small">Diseño adjunto</div>
+            <a href="{{ order.design_image.url }}" class="link-light" target="_blank">Ver imagen</a>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<div class="glass-card p-4">
+    <h5 class="text-white mb-3">Productos de la orden</h5>
+    <div class="table-responsive">
+        <table class="table custom-table mb-0">
+            <thead>
+                <tr>
+                    <th>Producto</th>
+                    <th>Talla</th>
+                    <th>Cantidad</th>
+                    <th>Precio unit.</th>
+                    <th>Subtotal</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in order.details.all %}
+                <tr>
+                    <td>{{ item.product.name|default:item.custom_name }}</td>
+                    <td>{{ item.size|default:'-' }}</td>
+                    <td>{{ item.quantity }}</td>
+                    <td>${{ item.unit_price }}</td>
+                    <td>${{ item.subtotal }}</td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="5" class="text-center text-muted">No hay detalles registrados.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<div class="glass-card p-4">
+    <h5 class="text-white mb-3">Pagos registrados</h5>
+    <div class="table-responsive">
+        <table class="table custom-table mb-0">
+            <thead>
+                <tr>
+                    <th>Fecha</th>
+                    <th>Monto</th>
+                    <th>Método</th>
+                    <th>Nota</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for payment in order.payments.all %}
+                <tr>
+                    <td class="text-muted small">{{ payment.date|date:'d/m/Y H:i' }}</td>
+                    <td class="text-success">${{ payment.amount }}</td>
+                    <td>{{ payment.payment_method }}</td>
+                    <td>{{ payment.note|default:'-' }}</td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="4" class="text-center text-muted">No se registraron pagos para esta orden.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

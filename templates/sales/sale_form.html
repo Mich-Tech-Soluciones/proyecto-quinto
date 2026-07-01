@@ -1,46 +1,125 @@
 {% extends "base.html" %}
 
-{% block page_title %}Registrar Venta{% endblock %}
+{% block page_title %}{% if order %}Editar Orden #{{ order.id }}{% else %}Registrar Orden{% endif %}{% endblock %}
 
 {% block content %}
-<div class="d-flex justify-content-between align-items-center mb-4">
-    <div class="text-muted">Añadir nueva venta (Se descontará del stock)</div>
-    <a href="{% url 'sale_list' %}" class="btn btn-outline-secondary rounded-pill border-secondary text-white">
-        <i class="bi bi-arrow-left"></i> Volver al listado
-    </a>
+<div class="d-flex flex-column flex-md-row justify-content-between align-items-start gap-3 mb-4">
+    <div>
+        <h3 class="text-white mb-1">{% if order %}Editar Orden{% else %}Nueva Orden{% endif %}</h3>
+        <p class="text-muted small mb-0">Completa los datos principales de la venta para llevar un control claro sobre el historial.</p>
+    </div>
+    <div class="d-flex gap-2">
+        <a href="{% url 'sales_history' %}" class="btn btn-outline-light btn-sm">
+            <i class="bi bi-arrow-left"></i> Volver al historial
+        </a>
+        {% if order %}
+        <a href="{% url 'order_detail' order.id %}" class="btn btn-atrium btn-sm">
+            <i class="bi bi-card-list"></i> Ver detalle
+        </a>
+        {% endif %}
+    </div>
 </div>
 
-<div class="glass-card" style="max-width: 600px;">
-    <form method="post">
-        {% csrf_token %}
-        
-        <div class="mb-3">
-            <label class="form-label text-muted small">Producto</label>
-            {{ form.product }}
-            {% if form.quantity.errors %}
-                <div class="text-danger small mt-1">{{ form.quantity.errors }}</div>
-            {% endif %}
-        </div>
-        
-        <div class="row">
-            <div class="col-md-6 mb-3">
-                <label class="form-label text-muted small">Cantidad</label>
-                {{ form.quantity }}
-            </div>
-            <div class="col-md-6 mb-3">
-                <label class="form-label text-muted small">Precio Total ($)</label>
-                {{ form.total_price }}
-            </div>
-        </div>
+<div class="glass-card p-4" style="max-width: 850px;">
+    {% if messages %}
+    <div class="mb-3">
+        {% for message in messages %}
+        <div class="alert alert-{{ message.tags }}" role="alert">{{ message }}</div>
+        {% endfor %}
+    </div>
+    {% endif %}
 
-        <div class="mb-3">
-            <label class="form-label text-muted small">Cliente (Opcional)</label>
-            {{ form.customer }}
+    {% if form.errors %}
+    <div class="alert alert-danger mb-3" role="alert">
+        <strong>Por favor corrige los siguientes errores:</strong>
+        <ul class="mb-0">
+            {% for field in form %}
+                {% for error in field.errors %}
+                    <li>{{ field.label }}: {{ error }}</li>
+                {% endfor %}
+            {% endfor %}
+            {% for error in form.non_field_errors %}
+                <li>{{ error }}</li>
+            {% endfor %}
+        </ul>
+    </div>
+    {% endif %}
+
+    <form method="post" enctype="multipart/form-data" action="">
+        {% csrf_token %}
+        <input type="hidden" name="cart_data" id="cart_data" value="[]">
+
+        <div class="row g-3">
+            <div class="col-md-6">
+                <label class="form-label small text-white-50">Nombre del Cliente</label>
+                {{ form.customer_name }}
+            </div>
+            <div class="col-md-6">
+                <label class="form-label small text-white-50">Empresa / Club</label>
+                {{ form.company }}
+            </div>
+            <div class="col-md-6">
+                <label class="form-label small text-white-50">Teléfono</label>
+                {{ form.customer_phone }}
+            </div>
+            <div class="col-md-6">
+                <label class="form-label small text-white-50">Email</label>
+                {{ form.customer_email }}
+            </div>
+            <div class="col-md-4">
+                <label class="form-label small text-white-50">Método de pago</label>
+                {{ form.payment_method }}
+            </div>
+            <div class="col-md-4">
+                <label class="form-label small text-white-50">Estado de pago</label>
+                {{ form.payment_status }}
+            </div>
+            <div class="col-md-4">
+                <label class="form-label small text-white-50">Estado de orden</label>
+                {{ form.status }}
+            </div>
+            <div class="col-12">
+                <label class="form-label small text-white-50">Especificaciones Técnicas</label>
+                {{ form.technical_specs }}
+            </div>
+            <div class="col-12">
+                <label class="form-label small text-white-50">Notas Adicionales</label>
+                {{ form.notes }}
+            </div>
+            <div class="col-12">
+                <label class="form-label small text-white-50">Diseño Adjunto</label>
+                {{ form.design_image }}
+            </div>
+            <div class="col-md-4">
+                <label class="form-label small text-white-50">Abono</label>
+                <input type="number" step="0.01" name="abono" id="abono_input" class="form-control" placeholder="0.00">
+            </div>
         </div>
 
         <div class="mt-4 text-end">
-            <button type="submit" class="btn btn-atrium px-4">Confirmar Venta</button>
+            <button type="submit" class="btn btn-atrium px-4">
+                <i class="bi bi-save"></i> {% if order %}Actualizar Orden{% else %}Guardar Orden{% endif %}
+            </button>
+            <button type="submit" name="save_and_new" value="1" class="btn btn-outline-light ms-2">Guardar y nuevo</button>
         </div>
     </form>
 </div>
+{% endblock %}
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function(){
+    const form = document.querySelector('form');
+    form && form.addEventListener('submit', function(e){
+        const cart = document.getElementById('cart_data');
+        try{
+            const items = JSON.parse(cart && cart.value || '[]');
+            if (!items || items.length === 0){
+                if (!confirm('No se han agregado productos al pedido. ¿Deseas guardar la orden igualmente?')){
+                    e.preventDefault();
+                }
+            }
+        }catch(err){/* ignore */}
+    });
+});
+</script>
 {% endblock %}
