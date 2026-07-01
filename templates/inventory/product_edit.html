@@ -1,0 +1,99 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block page_title %}Editar Producto #{{ product.id }}{% endblock %}
+
+{% block content %}
+<div class="row g-4 justify-content-center">
+    <div class="col-lg-8">
+        <!-- Mostrar Notificaciones -->
+        {% if messages %}
+        <div class="mb-3">
+            {% for msg in messages %}
+            <div class="alert alert-dismissible fade show py-2 px-3 small"
+                 style="background:rgba(242,232,198,.08); border:1px solid rgba(242,232,198,.25); color:var(--ats-cream);" role="alert">
+                <i class="bi bi-info-circle-fill me-2 text-warning"></i>{{ msg }}
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="alert"></button>
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        <div class="glass-card shadow-lg">
+            <h4 class="fw-bold mb-4 text-atrium border-bottom pb-2 d-flex justify-content-between align-items-center">
+                <span>
+                    <i class="bi bi-pencil-square me-2"></i>
+                    Editar Producto #{{ product.id }}
+                </span>
+                <a href="{% url 'inventory_manage' %}" class="btn btn-sm btn-outline-secondary text-white border-secondary rounded-pill px-3">
+                    <i class="bi bi-arrow-left me-1"></i> Volver al listado
+                </a>
+            </h4>
+            
+            <form method="POST" enctype="multipart/form-data">
+                {% csrf_token %}
+                
+                <div class="mb-3">
+                    <label class="form-label text-white-50 small fw-bold">Nombre del Producto</label>
+                    <input type="text" name="nombre" class="form-control" value="{{ product.name }}" required>
+                </div>
+                
+                <div class="mb-3">
+                    <label class="form-label text-white-50 small fw-bold">Descripción</label>
+                    <textarea name="descripcion" class="form-control" rows="3">{{ product.description }}</textarea>
+                </div>
+                
+                <div class="mb-3">
+                    <label class="form-label text-white-50 small fw-bold">Categoría</label>
+                    <select name="categoria" class="form-select" required>
+                        {% for cat in categories %}
+                            <option value="{{ cat.id }}" {% if product.category and product.category.id == cat.id %}selected{% endif %}>
+                                {{ cat.name }} ({{ cat.catalog.name }})
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                
+                <div class="row g-3 mb-3">
+                    <div class="col-md-4">
+                        <label class="form-label text-white-50 small fw-bold">Precio ($)</label>
+                        <input type="number" step="0.01" min="0" name="precio" class="form-control" value="{{ product.price }}" required>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label text-white-50 small fw-bold" title="Costo Base">Costo ($)</label>
+                        <input type="number" step="0.01" min="0" name="costo" class="form-control border-warning" value="{{ product.cost }}" required>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label text-white-50 small fw-bold">Stock Global</label>
+                        <input type="number" min="0" name="stock" class="form-control" value="{{ product.stock }}" required>
+                    </div>
+                </div>
+                
+                <div class="mb-4">
+                    <label class="form-label text-white-50 small fw-bold">Imagen</label>
+                    {% if product.image %}
+                        <div class="mb-2">
+                            <img src="{{ product.image.url }}" class="rounded border border-secondary p-1" style="max-height: 120px; object-fit: contain;">
+                        </div>
+                    {% endif %}
+                    <input type="file" name="imagen" class="form-control" accept="image/*">
+                </div>
+                
+                <div class="form-check form-switch mb-4">
+                    <input type="checkbox" name="destacado" class="form-check-input" id="checkDestacado" {% if product.featured %}checked{% endif %}>
+                    <label class="form-check-label text-white fw-bold" for="checkDestacado">
+                        <i class="bi bi-star-fill text-warning me-1"></i> Destacar en catálogo
+                    </label>
+                </div>
+                
+                <div class="d-flex gap-2">
+                    <button type="submit" class="btn btn-atrium w-100 py-2 fw-bold">
+                        ACTUALIZAR DATOS
+                    </button>
+                    <a href="{% url 'inventory_manage' %}" class="btn btn-dark w-100 py-2 border-secondary">Cancelar</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

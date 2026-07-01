@@ -1,88 +1,136 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.views import View
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
-from django.http import JsonResponse
+from django.contrib import messages
 from .models import Product, Catalog, Category, ProductSize, Kardex
+
+
+class CategoryBaseView(LoginRequiredMixin, UserPassesTestMixin, View):
+    def test_func(self):
+        return self.request.user.is_superuser or self.request.user.role in ['ADMIN', 'DESIGN']
+
+    def get_catalog(self):
+        return Catalog.objects.first() or Catalog.objects.create(name='Catálogo General', icon='bi-folder')
+
+
+class CreateCategoryView(CategoryBaseView):
+    def post(self, request):
+        name = request.POST.get('nombre', '').strip()
+        if not name:
+            messages.error(request, 'El nombre de la categoría es requerido.')
+            return redirect('inventory_manage')
+
+        try:
+            catalog = self.get_catalog()
+            if Category.objects.filter(catalog=catalog, name=name).exists():
+                messages.error(request, 'Ya existe una categoría con este nombre.')
+            else:
+                category = Category.objects.create(name=name, catalog=catalog)
+                messages.success(request, f'Categoría «{category.name}» creada con éxito.')
+        except Exception as e:
+            messages.error(request, f'Error al crear categoría: {str(e)}')
+
+        return redirect('inventory_manage')
+
+
+class EditCategoryView(CategoryBaseView):
+    def post(self, request, pk):
+        category = get_object_or_404(Category, pk=pk)
+        new_name = request.POST.get('nombre', '').strip()
+        if not new_name:
+            messages.error(request, 'El nombre de la categoría es requerido.')
+            return redirect('inventory_manage')
+
+        try:
+            if Category.objects.filter(catalog=category.catalog, name=new_name).exclude(id=category.id).exists():
+                messages.error(request, 'Ya existe una categoría con este nombre.')
+            else:
+                category.name = new_name
+                category.save()
+                messages.success(request, f'Categoría «{category.name}» actualizada con éxito.')
+        except Exception as e:
+            messages.error(request, f'Error al editar categoría: {str(e)}')
+
+        return redirect('inventory_manage')
+
+
+class DeleteCategoryView(CategoryBaseView):
+    def post(self, request, pk):
+        try:
+            category = get_object_or_404(Category, pk=pk)
+            name = category.name
+            category.delete()
+            messages.success(request, f'Categoría «{name}» eliminada con éxito.')
+        except Exception as e:
+            messages.error(request, f'Error al eliminar categoría: {str(e)}')
+
+        return redirect('inventory_manage')
+
+
+def _safe_float(value, default=0.0):
+    """Convierte un valor a float de forma segura, manejando comas como separadores decimales."""
+    if value is None:
+        return default
+    try:
+        # Reemplaza coma por punto para locales que usan coma decimal
+        return float(str(value).replace(',', '.').strip() or default)
+    except (ValueError, TypeError):
+        return default
+
+
+def _safe_int(value, default=0):
+    """Convierte un valor a int de forma segura."""
+    if value is None:
+        return default
+    try:
+        return int(str(value).strip() or default)
+    except (ValueError, TypeError):
+        return default
+
 
 class ManageInventoryView(LoginRequiredMixin, UserPassesTestMixin, View):
     def test_func(self):
         return self.request.user.is_superuser or self.request.user.role in ['ADMIN', 'DESIGN']
 
     def get(self, request):
-        catalog_filter = request.GET.get('filter_catalogo', '')
         category_filter = request.GET.get('filter_cat', '')
-        
-        catalogs = Catalog.objects.all().order_by('name')
+
         categories = Category.objects.all().order_by('name')
-        
+        catalogs = Catalog.objects.all().order_by('name')
         products = Product.objects.all().order_by('-id')
-        if catalog_filter:
-            products = products.filter(catalog__name=catalog_filter)
+
         if category_filter:
-            products = products.filter(category__name=category_filter)
-            
-        edit_product = None
-        edit_sizes = []
-        if 'edit' in request.GET:
-            try:
-                edit_product = Product.objects.get(id=request.GET['edit'])
-                edit_sizes = edit_product.sizes.all()
-            except Product.DoesNotExist:
-                pass
+            products = products.filter(category__id=category_filter)
 
         context = {
-            'catalogs': catalogs,
             'categories': categories,
+            'catalogs': catalogs,
             'products': products,
-            'catalog_filter': catalog_filter,
             'category_filter': category_filter,
-            'edit_product': edit_product,
-            'edit_sizes': edit_sizes,
         }
         return render(request, 'inventory/productos.html', context)
 
     def post(self, request):
-        action = request.POST.get('action')
-        
-        if action == 'update_stock':
-            product_id = request.POST.get('id')
-            new_stock = int(request.POST.get('stock', 0))
-            product = get_object_or_404(Product, id=product_id)
-            prev_stock = product.stock
-            
-            if prev_stock != new_stock:
-                mov_type = 'Entrada' if new_stock > prev_stock else 'Salida'
-                diff = abs(new_stock - prev_stock)
-                product.stock = new_stock
-                product.save()
-                
-                Kardex.objects.create(
-                    product=product,
-                    movement_type=mov_type,
-                    quantity=diff,
-                    prev_stock=prev_stock,
-                    new_stock=new_stock,
-                    reason='Ajuste Manual Rápido',
-                    user=request.user
-                )
-            return JsonResponse({'status': 'OK'})
-            
-        elif action in ['add', 'edit']:
-            product_id = request.POST.get('id')
-            name = request.POST.get('nombre')
-            desc = request.POST.get('descripcion')
-            cat_name = request.POST.get('catalogo')
-            subcat_name = request.POST.get('categoria')
-            price = request.POST.get('precio', 0)
-            cost = request.POST.get('costo', 0)
-            stock = request.POST.get('stock', 0)
-            featured = request.POST.get('destacado') == 'on'
-            
-            # Find catalog and category
-            catalog = Catalog.objects.filter(name=cat_name).first()
-            category = Category.objects.filter(name=subcat_name, catalog=catalog).first()
-            
-            if action == 'add':
+        action = request.POST.get('action', '').strip()
+
+        # ── Agregar producto (form normal) ─────────────────────────────────
+        if action == 'add':
+            try:
+                name = request.POST.get('nombre', '').strip()
+                desc = request.POST.get('descripcion', '')
+                category_id = request.POST.get('categoria')
+                price = _safe_float(request.POST.get('precio', '0'))
+                cost = _safe_float(request.POST.get('costo', '0'))
+                stock = _safe_int(request.POST.get('stock', '0'))
+                featured = request.POST.get('destacado') == 'on'
+
+                if not name:
+                    messages.error(request, "El nombre de la prenda es obligatorio.")
+                    return redirect('inventory_manage')
+
+                category = Category.objects.filter(id=category_id).first()
+                catalog = category.catalog if category else None
+
                 product = Product.objects.create(
                     name=name, description=desc, catalog=catalog, category=category,
                     price=price, cost=cost, stock=stock, featured=featured
@@ -90,35 +138,127 @@ class ManageInventoryView(LoginRequiredMixin, UserPassesTestMixin, View):
                 if 'imagen' in request.FILES:
                     product.image = request.FILES['imagen']
                     product.save()
-            else:
-                product = get_object_or_404(Product, id=product_id)
-                product.name = name
-                product.description = desc
-                product.catalog = catalog
-                product.category = category
-                product.price = price
-                product.cost = cost
-                product.stock = stock
-                product.featured = featured
-                if 'imagen' in request.FILES:
-                    product.image = request.FILES['imagen']
-                product.save()
-                
+
+                # Agregar movimiento inicial a Kardex si hay stock inicial
+                if stock > 0:
+                    Kardex.objects.create(
+                        product=product,
+                        movement_type='Entrada',
+                        quantity=stock,
+                        prev_stock=0,
+                        new_stock=stock,
+                        reason='Stock inicial al crear producto',
+                        user=request.user
+                    )
+
+                messages.success(request, f"Prenda «{product.name}» agregada con éxito.")
+
+            except Exception as e:
+                messages.error(request, f"Error al agregar prenda: {str(e)}")
+
             return redirect('inventory_manage')
-            
-        elif action == 'add_catalogo':
-            name = request.POST.get('nombre_cat')
-            icon = request.POST.get('icono_cat', 'bi-folder')
-            if name:
-                Catalog.objects.get_or_create(name=name, defaults={'icon': icon})
+
+        # ── Crear categoría ─────────────────────────────────────────
+        elif action in {'create_category', 'create'}:
+            return CreateCategoryView.as_view()(request)
+
+        # ── Editar categoría ────────────────────────────────────────
+        elif action in {'edit_category', 'edit'}:
+            category_id = request.POST.get('id') or request.POST.get('category_id')
+            if category_id:
+                return EditCategoryView.as_view()(request, pk=category_id)
+            messages.error(request, 'No se encontró la categoría a editar.')
             return redirect('inventory_manage')
-            
-        elif action == 'add_categoria':
-            cat_id = request.POST.get('catalogo_id')
-            name = request.POST.get('nombre_sub')
-            catalog = get_object_or_404(Catalog, id=cat_id)
-            if name:
-                Category.objects.get_or_create(catalog=catalog, name=name)
+
+        # ── Eliminar categoría ──────────────────────────────────────
+        elif action in {'delete_category', 'delete'}:
+            category_id = request.POST.get('id') or request.POST.get('category_id')
+            if category_id:
+                return DeleteCategoryView.as_view()(request, pk=category_id)
+            messages.error(request, 'No se encontró la categoría a eliminar.')
             return redirect('inventory_manage')
-            
+
+        return redirect('inventory_manage')
+
+
+class EditProductView(LoginRequiredMixin, UserPassesTestMixin, View):
+    def test_func(self):
+        return self.request.user.is_superuser or self.request.user.role in ['ADMIN', 'DESIGN']
+
+    def get(self, request, pk):
+        product = get_object_or_404(Product, id=pk)
+        categories = Category.objects.all().order_by('name')
+        context = {
+            'product': product,
+            'categories': categories,
+        }
+        return render(request, 'inventory/product_edit.html', context)
+
+    def post(self, request, pk):
+        product = get_object_or_404(Product, id=pk)
+        try:
+            name = request.POST.get('nombre', '').strip()
+            if not name:
+                messages.error(request, "El nombre del producto es obligatorio.")
+                return redirect('product_edit', pk=pk)
+
+            desc = request.POST.get('descripcion', '')
+            category_id = request.POST.get('categoria')
+            price = _safe_float(request.POST.get('precio', '0'))
+            cost = _safe_float(request.POST.get('costo', '0'))
+            stock = _safe_int(request.POST.get('stock', '0'))
+            featured = request.POST.get('destacado') == 'on'
+
+            category = Category.objects.filter(id=category_id).first()
+            catalog = category.catalog if category else None
+
+            prev_stock = product.stock
+
+            product.name = name
+            product.description = desc
+            product.catalog = catalog
+            product.category = category
+            product.price = price
+            product.cost = cost
+            product.stock = stock
+            product.featured = featured
+
+            if 'imagen' in request.FILES:
+                product.image = request.FILES['imagen']
+            product.save()
+
+            # Registrar en kardex si cambió el stock
+            if prev_stock != stock:
+                mov_type = 'Entrada' if stock > prev_stock else 'Salida'
+                diff = abs(stock - prev_stock)
+                Kardex.objects.create(
+                    product=product,
+                    movement_type=mov_type,
+                    quantity=diff,
+                    prev_stock=prev_stock,
+                    new_stock=stock,
+                    reason='Ajuste Manual - Edición Externa',
+                    user=request.user
+                )
+
+            messages.success(request, f"Producto «{product.name}» actualizado correctamente.")
+            return redirect('inventory_manage')
+
+        except Exception as e:
+            messages.error(request, f"Error al actualizar producto: {str(e)}")
+            return redirect('product_edit', pk=pk)
+
+
+class DeleteProductView(LoginRequiredMixin, UserPassesTestMixin, View):
+    def test_func(self):
+        return self.request.user.is_superuser or self.request.user.role in ['ADMIN', 'DESIGN']
+
+    def post(self, request, pk):
+        product = get_object_or_404(Product, id=pk)
+        name = product.name
+        try:
+            product.delete()
+            messages.success(request, f"Producto «{name}» eliminado con éxito.")
+        except Exception as e:
+            messages.error(request, f"Error al eliminar producto: {str(e)}")
         return redirect('inventory_manage')
