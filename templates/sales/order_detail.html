@@ -29,15 +29,15 @@
         </div>
         <div class="col-md-4">
             <div class="text-white-50 small">Total</div>
-            <div class="fw-bold text-success">${{ order.total }}</div>
+            <div class="fw-bold text-success">${{ order.total|floatformat:2 }}</div>
         </div>
         <div class="col-md-4">
             <div class="text-white-50 small">Pagado</div>
-            <div class="fw-bold text-white">${{ order.paid_amount }}</div>
+            <div class="fw-bold text-white">${{ order.paid_amount|floatformat:2 }}</div>
         </div>
         <div class="col-md-4">
             <div class="text-white-50 small">Saldo pendiente</div>
-            <div class="fw-bold text-warning">${{ order.balance }}</div>
+            <div class="fw-bold text-warning">${{ order.balance|floatformat:2 }}</div>
         </div>
         <div class="col-md-4">
             <div class="text-white-50 small">Fecha</div>
